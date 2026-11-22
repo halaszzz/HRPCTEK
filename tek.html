@@ -1,0 +1,1327 @@
+<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TEK dolgozói felület</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="preconnect" href="https://script.google.com" crossorigin><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin><link rel="preload" as="image" href="kepek/tek2.png"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script><style>
+:root{
+  /* TEK logó sárga – ha eltér a logódtól, csak ezt a 3 sort írd át */
+  --tek-yellow:#f5c400;
+  --tek-yellow-hover:#ffd21f;
+  --tek-yellow-soft:rgba(245,196,0,0.14);
+  --tek-yellow-ring:rgba(245,196,0,0.25);
+
+  --sidebar:rgba(14,16,22,0.72);
+  --card:rgba(18,20,28,0.42);
+  --input-bg:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.13);
+  --text:#ffffff;
+  --text-muted:#c3c9d3;
+  --text-light:#9aa3b2;
+  --danger:#ff6b70
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d0f14;color:var(--text);min-height:100vh}
+
+/* Háttérkép: kepek/tek2.png */
+.bg{position:fixed;inset:-20px;background:url('kepek/tek2.png') center center / cover no-repeat;filter:blur(9px) brightness(0.55);transform:scale(1.06) translateZ(0);will-change:transform;z-index:0;pointer-events:none}
+.bg-overlay{position:fixed;inset:0;background:rgba(10,12,18,0.40);z-index:1;pointer-events:none}
+.app{position:relative;z-index:2;display:flex;min-height:100vh}
+
+/* Közös sárga hover-körvonal */
+.menu-item:hover{box-shadow:inset 0 0 0 1.5px var(--tek-yellow)}
+
+/* Oldalsáv */
+.sidebar{width:256px;flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:20px 20px 18px;border-bottom:1px solid var(--border)}
+.brand img{width:42px;height:42px;object-fit:contain}
+.brand .txt{line-height:1.25}
+.brand .txt b{font-size:15px;font-weight:700;display:block}
+.brand .txt span{font-size:12px;color:var(--text-light)}
+.menu{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.menu-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;font-size:14px;font-weight:500;color:var(--text-muted);cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:inherit;transition:background .14s ease,color .14s ease,box-shadow .14s ease}
+.menu-item svg{width:19px;height:19px;flex-shrink:0;stroke-width:2}
+.menu-item:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.menu-item.active{background:var(--tek-yellow-soft);color:var(--tek-yellow);font-weight:600}
+.menu-divider{height:1px;background:var(--border);margin:12px 8px 8px}
+.menu-cimke{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text-light);padding:4px 13px 6px}
+.sidebar-footer{padding:14px 12px;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px;padding:6px 6px 10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--tek-yellow);color:#111;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+.user-row .info{line-height:1.3;overflow:hidden}
+.user-row .info .nev{font-size:13px;font-weight:600;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.user-row .info .rang{font-size:12px;color:var(--text-light)}
+.logout{width:100%;padding:10px;border:1px solid var(--border);background:transparent;color:var(--text-muted);border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .14s ease,color .14s ease}
+.logout:hover{border-color:var(--tek-yellow);color:var(--danger)}
+
+/* Tartalom */
+.content{flex:1;min-width:0}
+.content-head{padding:26px 34px 0}
+.content-head h1{font-size:26px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.content-head p{font-size:14px;color:var(--text-muted);margin-top:4px}
+.content-body{padding:24px 34px 40px}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px 20px}
+.chart-card h3{font-size:14px;font-weight:600}
+.chart-card .sub{font-size:12px;color:var(--text-light);margin-top:2px;margin-bottom:14px}
+.chart-wrap{position:relative;height:220px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.stat .label{font-size:12px;color:var(--text-light);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.stat .value{font-size:24px;font-weight:700;margin-top:6px}
+.stat .value.small{font-size:18px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.panel h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.panel p{font-size:14px;color:var(--text-muted)}
+.empty{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:56px 24px;text-align:center}
+.empty .icon{width:56px;height:56px;margin:0 auto 16px;border-radius:14px;background:var(--tek-yellow-soft);color:var(--tek-yellow);display:flex;align-items:center;justify-content:center}
+.empty .icon svg{width:28px;height:28px;stroke-width:2}
+.empty h3{font-size:17px;font-weight:700}
+.empty p{font-size:14px;color:var(--text-muted);margin-top:6px}
+.empty .tag{display:inline-block;margin-top:16px;font-size:12px;font-weight:600;color:var(--tek-yellow);background:var(--tek-yellow-soft);padding:5px 12px;border-radius:999px}
+
+/* Űrlapok */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 28px;max-width:620px;margin:0 auto}
+.form-card>h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.form-card>.lead{font-size:13px;color:var(--text-muted);margin-bottom:22px}
+.fld{margin-bottom:18px}
+.fld>label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:border-color .14s ease,box-shadow .14s ease}
+.fld input::placeholder,.fld textarea::placeholder{color:#8f97a5}
+.fld select option{background:#1a1d27;color:#fff}
+.fld textarea{resize:vertical;min-height:130px;line-height:1.5}
+.fld input:hover,.fld select:hover,.fld textarea:hover{border-color:var(--tek-yellow)}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--tek-yellow);box-shadow:0 0 0 3px var(--tek-yellow-ring)}
+.fld .hint{font-size:12px;color:var(--text-light);margin-top:6px}
+.form-submit{margin-top:22px;background:var(--tek-yellow);color:#111;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;outline:2px solid transparent;outline-offset:2px;transition:background .14s ease,outline-color .14s ease}
+.form-submit:hover{background:var(--tek-yellow-hover);outline-color:var(--tek-yellow)}
+.form-submit:disabled{opacity:.65;cursor:default;outline-color:transparent}
+.form-msg{margin-top:16px;font-size:13px;border-radius:10px;padding:11px 14px;display:none}
+.form-msg.show{display:block}
+.form-msg.ok{background:rgba(46,204,113,.14);border:1px solid rgba(46,204,113,.4);color:#7fe3a8}
+.form-msg.err{background:rgba(229,72,77,.14);border:1px solid rgba(229,72,77,.45);color:#ffa3a6}
+
+/* Kézikönyv */
+.kk-lista-elem{cursor:pointer;transition:border-color .14s ease}
+.kk-lista-elem:hover{border-color:var(--tek-yellow)}
+.kk-lista-elem .elonezet{font-size:13px;color:var(--text-muted);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kk-meta{font-size:12px;color:var(--text-light);margin:4px 0 14px}
+.kk-tartalom{font-size:14px;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word}
+
+/* Admin */
+.admin-lista{display:flex;flex-direction:column;gap:16px;max-width:920px}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.admin-card .fej{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.admin-card .fej .nev{font-size:15px;font-weight:700}
+.admin-card .fej .fn,.fn{font-size:12px;color:var(--text-light)}
+.admin-card .fej .spacer{flex:1}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--tek-yellow-soft);color:var(--tek-yellow)}
+.badge.szurke{background:rgba(255,255,255,.08);color:var(--text-muted)}
+.badge.zold{background:rgba(46,204,113,.15);color:#7fe3a8}
+.badge.piros{background:rgba(229,72,77,.15);color:#ffa3a6}
+.badge.sarga{background:rgba(255,166,0,.16);color:#ffc266}
+.subtabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.subtab{border:1px solid var(--border);background:var(--card);color:var(--text-muted);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .14s ease,color .14s ease,border-color .14s ease}
+.subtab:hover{border-color:var(--tek-yellow);color:var(--text)}
+.subtab.active{background:var(--tek-yellow);border-color:var(--tek-yellow);color:#111}
+.kerelem-ertek{font-size:14px;color:var(--text);margin:4px 0 10px}
+.kerelem-ertek b{font-weight:600}
+.kerelem-meta{font-size:12px;color:var(--text-muted)}
+.kerelem-dontes{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.kerelem-dontes input{flex:1;min-width:160px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;color:var(--text);outline:none}
+.kerelem-dontes input:hover,.kerelem-dontes input:focus{border-color:var(--tek-yellow)}
+table.admin-tabla{width:100%;border-collapse:collapse;font-size:13px}
+table.admin-tabla th{text-align:left;font-weight:600;color:var(--text-light);font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--border)}
+table.admin-tabla td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
+table.admin-tabla tr:last-child td{border-bottom:none}
+table.admin-tabla a{color:var(--tek-yellow);text-decoration:none;border-radius:4px;padding:1px 3px}
+table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
+.btn-mini{border:1px solid var(--border);background:transparent;color:var(--text-muted);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .14s ease}
+.btn-mini:hover{border-color:var(--tek-yellow);color:var(--text)}
+.btn-mini.kek{background:var(--tek-yellow);border-color:var(--tek-yellow);color:#111}
+.btn-mini.kek:hover{background:var(--tek-yellow-hover);outline:2px solid var(--tek-yellow);outline-offset:2px}
+.btn-mini.piros{border-color:rgba(229,72,77,.5);color:var(--danger)}
+.btn-mini.piros:hover{background:rgba(229,72,77,.15);border-color:var(--tek-yellow)}
+.btn-mini:disabled{opacity:.6;cursor:default}
+.dolgozo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+.dolgozo-grid .fld{margin-bottom:0}
+.dolgozo-kapcsolok{display:flex;gap:18px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.kapcsolo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;cursor:pointer;padding:4px 8px;border:1px solid transparent;border-radius:8px;transition:border-color .14s ease}
+.kapcsolo:hover{border-color:var(--tek-yellow)}
+.kapcsolo input{width:16px;height:16px;accent-color:var(--tek-yellow)}
+.admin-gombsor{display:flex;gap:10px}
+.admin-total-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;max-width:920px}
+.veszelyzona{border:1px solid rgba(229,72,77,.45);background:rgba(229,72,77,.10);border-radius:12px;padding:16px 18px;margin-top:8px;max-width:920px}
+.veszelyzona h4{font-size:13px;font-weight:700;color:#ff8a8e;margin-bottom:4px}
+.veszelyzona p{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.admin-ures{color:var(--text-muted);font-size:14px;padding:30px 0;text-align:center}
+@media (max-width:620px){.dolgozo-grid,.admin-total-row{grid-template-columns:1fr}}
+.view{display:none}
+.view.active{display:block}
+@media (max-width:860px){.app{flex-direction:column}.sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border)}.menu{flex-direction:row;overflow-x:auto;padding:10px;gap:6px}.menu-item{white-space:nowrap;width:auto}.sidebar-footer{display:flex;align-items:center;gap:12px}.user-row{flex:1;padding:0}.logout{width:auto;padding:10px 16px}.content-head{padding:22px 18px 0}.content-body{padding:18px}.charts{grid-template-columns:1fr}}
+
+/* ── BTK kalkulátor ── */
+.btk{display:flex;flex-direction:column;gap:14px;max-width:1200px;width:100%;margin:0 auto}
+/* BTK nézet: az oldal nem görget, csak a BTK táblázat */
+@media (min-width:861px){
+  body:has(#view-jelentes.active){overflow:hidden}
+  .content:has(#view-jelentes.active){height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  .content:has(#view-jelentes.active) .content-body{flex:1;min-height:0;display:flex;flex-direction:column;padding-bottom:24px}
+  #view-jelentes.active{flex:1;min-height:0;display:flex;flex-direction:column}
+  #view-jelentes .btk{flex:1;min-height:0}
+  #view-jelentes .btk-tabla-wrap{flex:1;min-height:160px;max-height:none}
+}
+.jk-form{max-width:820px}
+.jk-form textarea{min-height:240px}
+.jk-szoveg{font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text);background:rgba(0,0,0,.15);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.jk-adatok{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 18px;font-size:13px;color:var(--text-muted)}
+.jk-adatok b{color:var(--text);font-weight:600}
+.btk-kereso-wrap{position:relative;z-index:5}
+.btk-kereso{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px 8px 4px 14px;transition:border-color .14s ease,box-shadow .14s ease}
+.btk-kereso:hover{border-color:var(--tek-yellow)}
+.btk-kereso:focus-within{border-color:var(--tek-yellow);box-shadow:0 0 0 3px var(--tek-yellow-ring)}
+.btk-kereso>svg{width:18px;height:18px;color:var(--text-light);flex-shrink:0}
+.btk-kereso input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:15px;padding:11px 0}
+.btk-kereso input::placeholder{color:#8f97a5}
+.btk-null{display:flex;align-items:center;gap:6px;background:none;border:1px solid transparent;color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:7px 10px;border-radius:8px;transition:border-color .14s ease,color .14s ease}
+.btk-null svg{width:14px;height:14px}
+.btk-null:hover{border-color:var(--tek-yellow);color:var(--text)}
+.btk-javaslat{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);background:rgba(18,20,28,.97);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.5);max-height:360px;overflow-y:auto}
+.btk-javaslat.nyitva{display:block}
+.btk-jav-elem{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;font-size:14px}
+.btk-jav-elem:hover,.btk-jav-elem.fokusz{border-color:var(--tek-yellow);background:rgba(255,255,255,.04)}
+.btk-jav-elem .p{color:var(--text-light);font-size:12px;width:44px;flex-shrink:0}
+.btk-jav-elem .n{flex:1}
+.btk-jav-elem .n small{color:var(--text-light)}
+.btk-jav-elem .b{color:var(--tek-yellow);font-weight:600;font-size:13px;white-space:nowrap}
+.btk-jav-elem.valasztva .b::after{content:' ✓'}
+.btk-calc{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
+.btk-bal{display:flex;flex-direction:column;gap:10px}
+.btk-stat{display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:10px;padding:12px 14px;border:1px solid var(--border)}
+.btk-stat.st-piros{background:linear-gradient(90deg,rgba(229,72,77,.14),rgba(46,204,113,.10))}
+.btk-stat.st-kek{background:linear-gradient(90deg,rgba(80,140,255,.12),rgba(80,140,255,.06))}
+.btk-stat.st-sarga{background:linear-gradient(90deg,var(--tek-yellow-soft),rgba(245,196,0,.04))}
+.btk-stat .oldal{display:flex;align-items:center;gap:10px;min-width:0}
+.btk-stat .oldal.jobb{text-align:right}
+.btk-stat b{display:block;font-size:19px;font-weight:700;word-break:break-word}
+.btk-stat small{display:block;font-size:11px;color:var(--text-light);margin-top:1px}
+.btk-stat .ikon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#111}
+.btk-stat .ikon svg{width:16px;height:16px}
+.st-piros .ikon{background:#ff7b7f}
+.st-piros .ikon.zold{background:#6fe09f}
+.st-kek .ikon{background:#7fb0ff}
+.st-sarga .ikon{background:var(--tek-yellow)}
+.btk-masol{background:none;border:1px solid transparent;color:var(--text);cursor:pointer;padding:7px;border-radius:8px;display:flex;transition:border-color .14s ease}
+.btk-masol svg{width:17px;height:17px}
+.btk-masol:hover{border-color:var(--tek-yellow)}
+.btk-jobb{background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;max-height:252px;overflow-y:auto}
+.btk-ki-elem{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid transparent;border-radius:8px;padding:8px 10px;font-size:13px}
+.btk-ki-elem:hover{border-color:var(--tek-yellow)}
+.btk-ki-elem .n{flex:1;min-width:0}
+.btk-ki-elem .n small{color:var(--text-light)}
+.btk-ki-elem .b{color:var(--text-muted);white-space:nowrap;font-size:12px}
+.btk-ki-elem button{background:none;border:1px solid transparent;color:var(--text-light);cursor:pointer;width:24px;height:24px;border-radius:6px;font-size:13px;line-height:1}
+.btk-ki-elem button:hover{border-color:var(--tek-yellow);color:var(--danger)}
+.ov-igen{color:#7fe3a8;font-weight:600}
+.ov-nem{color:#ff9a9e;font-weight:600}
+.btk-ki-ures{color:var(--text-light);font-size:13px;text-align:center;margin:auto;padding:20px 10px}
+.btk-tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;max-height:70vh;overflow:auto}
+.btk-tabla{width:100%;border-collapse:collapse;font-size:13px}
+.btk-tabla-wrap{contain:content;overscroll-behavior:contain}
+.btk-tabla thead th{position:sticky;top:0;z-index:1;background:rgba(18,20,28,.96);text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text-light);padding:12px 12px;border-bottom:1px solid var(--border)}
+.btk-tabla td{padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.btk-tabla td:nth-child(1){white-space:nowrap;color:var(--text-light)}
+.btk-tabla td:nth-child(2){min-width:170px;font-weight:500}
+.btk-tabla td:nth-child(3),.btk-tabla td:nth-child(4),.btk-tabla td:nth-child(5){white-space:nowrap;text-align:center}
+.btk-tabla td:nth-child(6){color:var(--text-muted);line-height:1.45;min-width:260px}
+.btk-tabla td:nth-child(7){text-align:center;font-weight:600;color:var(--tek-yellow)}
+.btk-tabla tr.szakasz td{background:rgba(255,255,255,.04);font-size:15px;font-weight:700;color:var(--text);padding:14px 12px;text-align:left}
+.btk-tabla tr.fejsor td{font-weight:700}
+.btk-tabla tr.sor{cursor:pointer;outline:1.5px solid transparent;outline-offset:-1.5px;transition:background .12s ease,outline-color .12s ease}
+.btk-tabla tr.sor:hover{outline-color:var(--tek-yellow);background:rgba(255,255,255,.03)}
+.btk-tabla tr.sor.valasztva{background:var(--tek-yellow-soft)}
+.btk-tabla tr.sor.valasztva td:nth-child(1)::before{content:'✓ ';color:var(--tek-yellow)}
+.btk-tabla tr.al td:nth-child(2){padding-left:26px;color:var(--text-muted)}
+@media (max-width:860px){.btk-calc{grid-template-columns:1fr}}
+</style></head><body><div class="bg"></div><div class="bg-overlay"></div><div class="app"><aside class="sidebar"><div class="brand"><img src="kepek/tek1.png" decoding="async" alt="logó"><div class="txt"><b>Terrorelhárítás</b><span>Budapesti Igazgatósága</span></div></div><nav class="menu" id="menu"><button class="menu-item active" data-view="attekintes" data-title="Áttekintés"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    Áttekintés
+                </button><button class="menu-item" data-view="szolgalat" data-title="Szolgálat leadás"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+                    Szolgálat leadás
+                </button><button class="menu-item" data-view="jelentes" data-title="Kalkulátor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8.01" y2="11"/><line x1="12" y1="11" x2="12.01" y2="11"/><line x1="16" y1="11" x2="16.01" y2="11"/><line x1="8" y1="15" x2="8.01" y2="15"/><line x1="12" y1="15" x2="12.01" y2="15"/><line x1="16" y1="15" x2="16.01" y2="15"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+                    Kalkulátor
+                </button><button class="menu-item" data-view="jkLeadas" data-title="Jelentés leadása"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Jelentés leadása
+                </button><button class="menu-item" data-view="adatmodositas" data-title="Adatmódosítás"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    Adatmódosítás
+                </button><button class="menu-item" data-view="kezikonyv" data-title="Kézikönyv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+                    Kézikönyv
+                </button><button class="menu-item" data-view="vizsgak" data-title="Vizsgák"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/><line x1="22" y1="10" x2="22" y2="15"/></svg>
+                    Vizsgák
+                </button><button class="menu-item" data-view="beallitasok" data-title="Beállítások"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Beállítások
+                </button><div class="menu-admin" id="menuAdmin" style="display:none;"><div class="menu-divider"></div><div class="menu-cimke">Admin</div><button class="menu-item" data-view="adminJelentesek" data-title="Leadott jelentések"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Leadott jelentések
+                    </button><button class="menu-item" data-view="adminSzolgalat" data-title="Szolgálati percek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+                        Szolgálati percek
+                    </button><button class="menu-item" data-view="adminUjDolgozo" data-title="Új dolgozó"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                        Új dolgozó
+                    </button><button class="menu-item" data-view="adminDolgozok" data-title="Dolgozók kezelése"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Dolgozók kezelése
+                    </button><button class="menu-item" data-view="adminOsszegzo" data-title="Összegző"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        Összegző
+                    </button><button class="menu-item" data-view="adminModositasok" data-title="Adatmódosítások"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        Adatmódosítások
+                    </button><button class="menu-item" data-view="adminKezikonyv" data-title="Kézikönyv kezelés"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+                        Kézikönyv kezelés
+                    </button></div></nav><div class="sidebar-footer"><div class="user-row"><div class="avatar" id="avatar">T</div><div class="info"><div class="nev" id="userNev">–</div><div class="rang" id="userRang">–</div></div></div><button class="logout" id="kilepesGomb">Kilépés</button></div></aside><main class="content"><div class="content-head"><h1 id="viewTitle">Áttekintés</h1><p id="viewSub">Terrorelárítási központ Budapesti Igazgatósága · belső frakció felület</p></div><div class="content-body"><section class="view active" id="view-attekintes"><div class="charts"><div class="chart-card"><h3>Heti jelentéseim</h3><div class="sub">Saját leadott jelentések a héten (naponta)</div><div class="chart-wrap"><canvas id="chartSajat"></canvas></div></div><div class="chart-card"><h3>Heti szolgálat ideje</h3><div class="sub">Saját szolgálati idő a héten (naponta, perc)</div><div class="chart-wrap"><canvas id="chartSzolg"></canvas></div></div></div><div class="stats"><div class="stat"><div class="label">Név</div><div class="value small" id="statNev">–</div></div><div class="stat"><div class="label">Rang</div><div class="value small" id="statRang">–</div></div><div class="stat"><div class="label">Jelentések</div><div class="value" id="sumJelentes">–</div></div><div class="stat"><div class="label">Szolgálati idő</div><div class="value small" id="sumPerc">–</div></div><div class="stat"><div class="label">Végösszeg</div><div class="value small" id="sumPenz">–</div></div></div><div class="panel"><h3>Üdvözlünk a belső rendszerben</h3><p>Jelenleg az oldal BETA verzióban fut, ezért lehetnek hibák benne. Ez egy Roleplay szerverhez készült, realitási alapja nincs, valóságnak nem felel meg.</p></div></section><section class="view" id="view-szolgalat"><div class="form-card"><h3>Szolgálat leadása</h3><p class="lead">Add meg a szolgálatba lépés és leadás időpontját, csak console-ból kimásolt rádiózással fogadjuk el a szolgálatot.</p><div class="fld"><label for="szolgKezdes">Szolgálatba lépés (ÉV/HÓNAP/NAP – ÓRA/PERC)</label><input type="text" id="szolgKezdes" placeholder="2026/07/05 - 14:30" autocomplete="off"></div><div class="fld"><label for="szolgVege">Szolgálat leadása (ÉV/HÓNAP/NAP – ÓRA/PERC)</label><input type="text" id="szolgVege" placeholder="2026/07/05 - 18:00" autocomplete="off"></div><div class="fld"><label for="szolgKonzol">Konzol napló</label><textarea id="szolgKonzol" placeholder="Ide illeszd be a konzolból a sorokat…"></textarea><div class="hint">Hosszabb, több soros szöveg is beilleszthető.</div></div><button class="form-submit" id="szolgKuld">Szolgálat leadása</button><div class="form-msg" id="szolgMsg"></div></div></section><section class="view" id="view-jelentes"><div class="btk">
+<div class="btk-kereso-wrap">
+  <div class="btk-kereso">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="btkKereso" placeholder="Keresés… (pl. gondatlan vezetés, GV, §2)" autocomplete="off">
+    <button class="btk-null" id="btkNullaz" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Nullázás</button>
+  </div>
+  <div class="btk-javaslat" id="btkJavaslat"></div>
+</div>
+
+<div class="btk-calc">
+  <div class="btk-bal">
+    <div class="btk-stat st-piros">
+      <div class="oldal"><span class="ikon">Ft</span><div><b id="bMinBirsag">0 Ft</b><small>Minimális bírság</small></div></div>
+      <div class="oldal jobb"><div><b id="bMaxBirsag">0 Ft</b><small>Maximális bírság</small></div><span class="ikon zold">Ft</span></div>
+    </div>
+    <div class="btk-stat st-kek">
+      <div class="oldal"><span class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span><div><b id="bMinBorton">0 perc</b><small>Minimális börtön</small></div></div>
+      <div class="oldal jobb"><div><b id="bMaxBorton">0 perc</b><small>Maximális börtön</small></div><span class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span></div>
+    </div>
+    <div class="btk-stat st-sarga">
+      <div class="oldal"><span class="ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span><div><b id="bRovid">–</b><small>Vádak (rövidítve)</small></div></div>
+      <button class="btk-masol" id="btkMasol" type="button" title="Rövidítések másolása"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+    </div>
+  </div>
+  <div class="btk-jobb" id="btkKivalasztott"></div>
+</div>
+
+<div class="btk-tabla-wrap">
+  <table class="btk-tabla">
+    <thead><tr><th>§</th><th>Megnevezés</th><th>Óvadék</th><th>Bírság</th><th>Letöltendő</th><th>Leírás</th><th>Rövidítés</th></tr></thead>
+    <tbody id="btkTbody"></tbody>
+  </table>
+  <div class="admin-ures" id="btkNincs" style="display:none;">Nincs találat.</div>
+</div>
+</div></section><section class="view" id="view-jkLeadas"><div class="form-card jk-form"><h3>Jelentés leadása</h3><p class="lead">Töltsd ki az összes mezőt. A jegyzőkönyvet részletesen írd le: mi történt, milyen intézkedés történt, mi lett az eredménye.</p>
+<div class="dolgozo-grid">
+<div class="fld"><label for="jkNev">Név</label><input type="text" id="jkNev" placeholder="pl. Somogyi Ottó" autocomplete="off"></div>
+<div class="fld"><label for="jkRang">Rendfokozat</label><input type="text" id="jkRang" placeholder="pl. r. Főtörzszászlós" autocomplete="off"></div>
+<div class="fld"><label for="jkAzon">Azonosítószám</label><input type="text" id="jkAzon" placeholder="pl. 45001" autocomplete="off"></div>
+<div class="fld"><label for="jkBeosztas">Beosztás</label><input type="text" id="jkBeosztas" placeholder="pl. Alosztályvezető" autocomplete="off"></div>
+<div class="fld"><label for="jkHely">Szolgálati hely</label><input type="text" id="jkHely" placeholder="pl. Műveleti Osztály, Bevetési Alosztály" autocomplete="off"></div>
+<div class="fld"><label for="jkDatum">Dátum</label><input type="date" id="jkDatum"></div>
+</div>
+<div class="fld" style="margin-top:18px"><label for="jkSzoveg">Jegyzőkönyv (részletesen)</label><textarea id="jkSzoveg" rows="10" placeholder="A mai nap során, szolgálat ellátása közben…"></textarea></div>
+<button class="form-submit" id="jkKuld">Jelentés leadása</button><div class="form-msg" id="jkMsg"></div></div></section><section class="view" id="view-adatmodositas"><div class="subtabs" id="modSubtabs"><button class="subtab active" data-sub="modAdat">Adatmódosítás</button><button class="subtab" data-sub="modIgeny">Igénylések</button><button class="subtab" data-sub="modElozmeny">Kérelmeim</button></div><div class="subview" id="sub-modAdat"><div class="form-card"><h3>Adatmódosítás</h3><p class="lead">A kérelmet a vezetőség hagyja jóvá – a változás csak elfogadás után lép életbe.</p><div class="fld"><label for="adatTipus">Mit szeretnél módosítani?</label><select id="adatTipus"><option value="jelszo">Új jelszó</option><option value="felhasznalonev">Felhasználónév módosítás</option><option value="jatekbeli_nev">InGame módosítás</option></select></div><div class="fld"><label for="adatErtek" id="adatErtekLabel">Új jelszó</label><input type="text" id="adatErtek" placeholder="Új jelszó" autocomplete="off"></div><button class="form-submit" id="adatKuld">Kérelem beküldése</button><div class="form-msg" id="adatMsg"></div></div></div><div class="subview" id="sub-modIgeny" style="display:none;"><div class="form-card"><h3>Igénylések</h3><p class="lead">Jármű, jelvény vagy admin jog igénylése. A vezetőség bírálja el.</p><div class="fld"><label for="igenyTipus">Mit szeretnél igényelni?</label><select id="igenyTipus"><option value="jarmu">Új jármű</option><option value="jelveny">Új jelvény</option><option value="admin">Admin jog</option></select></div><div class="fld" id="igenyErtekFld"><label for="igenyErtek" id="igenyErtekLabel">Melyik járművet igényled?</label><input type="text" id="igenyErtek" placeholder="Jármű rendszáma" autocomplete="off"></div><button class="form-submit" id="igenyKuld">Igénylés beküldése</button><div class="form-msg" id="igenyMsg"></div></div></div><div class="subview" id="sub-modElozmeny" style="display:none;"><div id="sajatKerelmekTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></div></section><section class="view" id="view-kezikonyv"><div id="kezikonyvLista" class="admin-lista"><div class="admin-ures">Betöltés…</div></div><div id="kezikonyvOlvaso" style="display:none;"><button class="btn-mini" id="kezikonyvVissza">← Vissza a listához</button><div class="form-card" style="margin-top:14px;"><h3 id="kkCim">–</h3><div class="kk-meta" id="kkMeta"></div><div class="kk-tartalom" id="kkTartalom"></div></div></div></section><section class="view" id="view-vizsgak"><div class="empty"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/></svg></div><h3>Vizsgák</h3><p>Vizsgák és képzések nyilvántartása.</p><span class="tag">Hamarosan</span></div></section><section class="view" id="view-beallitasok"><div class="empty"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div><h3>Beállítások</h3><p>Fiók- és rendszerbeállítások.</p><span class="tag">Hamarosan</span></div></section><section class="view" id="view-adminJelentesek"><div id="adminJelentesekTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminSzolgalat"><div id="adminSzolgalatTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminUjDolgozo"><div class="form-card"><h3>Új felhasználó</h3><p class="lead">Új felhasználói fiók létrehozása a szolgálathoz.</p><div class="fld"><label for="ujFn">Felhasználó név</label><input type="text" id="ujFn" placeholder="pl. kovacs.bela" autocomplete="off"></div><div class="fld"><label for="ujJelszo">Jelszó</label><input type="text" id="ujJelszo" placeholder="Jelszó" autocomplete="off"></div><div class="fld"><label for="ujNev">Ingame neve</label><input type="text" id="ujNev" placeholder="pl. Kovács Béla" autocomplete="off"></div><div class="fld"><label for="ujRang">Rendfokozat</label><select id="ujRang"><option value="r. Alezredes">r. Alezredes</option><option value="r. Ezredes">r. Ezredes</option><option value="r. Őrnagy">r. Őrnagy</option><option value="r. Százados">r. Százados</option><option value="r. Főhadnagy">r. Főhadnagy</option><option value="r. Hadnagy">r. Hadnagy</option><option value="r. Főtörzszászlós">r. Főtörzszászlós</option><option value="&quot;B+&quot; r. Törzszászlós">r. Törzszászlós</option><option value="&quot;A&quot; r. Zászlós">r. Zászlós</option><option value="r. Főtörzsőrmester" selected>r. Főtörzsőrmester</option><option value="r. Törzsőrmester" selected>r. Törzsőrmester</option><option value="r. Őrmester" selected>r. Őrmester</option><option value="r. Próbaidős Őrmester" selected>r. Próbaidős Őrmester</option></select></div><button class="form-submit" id="ujDolgozoKuld">Account létrehozása</button><div class="form-msg" id="ujDolgozoMsg"></div></div></section><section class="view" id="view-adminDolgozok"><div id="adminDolgozokTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminOsszegzo"><div class="admin-total-row"><div class="stat"><div class="label">Heti jelentések</div><div class="value" id="oJel">–</div></div><div class="stat"><div class="label">Heti szolgálati idő ((perc))</div><div class="value small" id="oPerc">–</div></div><div class="stat"><div class="label">Heti végösszeg</div><div class="value small" id="oPenz">–</div></div></div><div id="adminOsszegzoTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div><div class="veszelyzona"><h4>Heti zárás</h4><p>Az összes leadott jelentés és szolgálat végleges törlése. Ez nem visszavonható, csak azután törölj, hogy zártál!</p><button class="btn-mini piros" id="nullazMind">Összes beküldés nullázása</button></div></section><section class="view" id="view-adminModositasok"><div id="adminModositasokTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminKezikonyv"><div class="form-card" style="margin-bottom:18px;"><h3 id="kkSzerkCim">Új kézikönyv téma</h3><p class="lead">Hozz létre egy témát, amit a dolgozók a Kézikönyv fülön elolvashatnak.</p><div class="fld"><label for="kkFormCim">Cím</label><input type="text" id="kkFormCim" placeholder="pl. Szolgálati protokoll" autocomplete="off"></div><div class="fld"><label for="kkFormTartalom">Tartalom</label><textarea id="kkFormTartalom" placeholder="A kézikönyv szövege…"></textarea></div><input type="hidden" id="kkFormId" value=""><button class="form-submit" id="kkMent">Létrehozás</button><button class="btn-mini" id="kkMegse" style="display:none; margin-left:8px;">Mégse</button><div class="form-msg" id="kkFormMsg"></div></div><div id="adminKezikonyvLista" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section></div></main></div><script src="config.js"></script><script>
+        if (sessionStorage.getItem('bejelentkezve') !== '1') {
+            window.location.replace('index.html');
+        }
+        const felhasznalonev = sessionStorage.getItem('user_felhasznalonev') || '';
+        const nev   = sessionStorage.getItem('user_nev')  || felhasznalonev || 'felhasználó';
+        const rang  = sessionStorage.getItem('user_rang') || 'Tag';
+        const admin = sessionStorage.getItem('user_admin') === '1';
+        document.getElementById('userNev').textContent  = nev;
+        document.getElementById('userRang').textContent = rang;
+        document.getElementById('statNev').textContent  = nev;
+        document.getElementById('statRang').textContent = rang;
+        document.getElementById('avatar').textContent   = (nev.trim()[0] || 'F').toUpperCase();
+        if (admin) document.getElementById('menuAdmin').style.display = 'block';
+        const menu   = document.getElementById('menu');
+        const cim     = document.getElementById('viewTitle');
+        const items  = menu.querySelectorAll('.menu-item');
+        const views  = document.querySelectorAll('.view');
+        menu.addEventListener('click', function (e) {
+            const gomb = e.target.closest('.menu-item');
+            if (!gomb) return;
+            items.forEach(i => i.classList.remove('active'));
+            gomb.classList.add('active');
+            const nezet = gomb.dataset.view;
+            views.forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + nezet).classList.add('active');
+            cim.textContent = gomb.dataset.title;
+            if (nezet.indexOf('admin') === 0 && typeof adminNezetBetolt === 'function') {
+                adminNezetBetolt(nezet);
+            }
+            if (nezet === 'jelentes' && typeof btkTablaEpit === 'function') btkTablaEpit();
+            if (nezet === 'kezikonyv' && typeof kezikonyvBetolt === 'function') {
+                kezikonyvBetolt();
+            }
+        });
+        document.getElementById('kilepesGomb').addEventListener('click', function () {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        });
+        async function kezikonyvBetolt() {
+            const lista = document.getElementById('kezikonyvLista');
+            const olvaso = document.getElementById('kezikonyvOlvaso');
+            olvaso.style.display = 'none';
+            lista.style.display = 'flex';
+            lista.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+            try {
+                await apiOlvas({ action: 'kezikonyvLista', felhasznalonev: felhasznalonev }, function (adat) {
+                if (!adat.ok) { lista.innerHTML = '<div class="admin-ures">' + htmlEsc(adat.error || 'Hiba') + '</div>'; return; }
+                const kk = adat.kezikonyvek || [];
+                kezikonyvBetolt._adatok = {};
+                kk.forEach(function (k) { kezikonyvBetolt._adatok[k.id] = k; });
+                if (kk.length === 0) { lista.innerHTML = '<div class="admin-ures">Még nincs kézikönyv téma.</div>'; return; }
+                lista.innerHTML = kk.map(function (k) {
+                    return '<div class="admin-card kk-lista-elem" data-kk-olvas="' + htmlEsc(k.id) + '">'
+                        + '<div class="fej"><span class="nev">' + htmlEsc(k.cim) + '</span></div>'
+                        + '<div class="elonezet">' + htmlEsc(k.tartalom) + '</div></div>';
+                }).join('');
+            }); } catch (err) { lista.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+        }
+        (function () {
+            const lista = document.getElementById('kezikonyvLista');
+            const olvaso = document.getElementById('kezikonyvOlvaso');
+            if (!lista) return;
+            lista.addEventListener('click', function (e) {
+                const el = e.target.closest('[data-kk-olvas]'); if (!el) return;
+                const k = (kezikonyvBetolt._adatok || {})[el.dataset.kkOlvas]; if (!k) return;
+                document.getElementById('kkCim').textContent = k.cim;
+                document.getElementById('kkMeta').textContent = 'Frissítve: ' + (k.modositva || k.letrehozva || '');
+                document.getElementById('kkTartalom').textContent = k.tartalom || '';
+                lista.style.display = 'none';
+                olvaso.style.display = 'block';
+            });
+            document.getElementById('kezikonyvVissza').addEventListener('click', function () {
+                olvaso.style.display = 'none';
+                lista.style.display = 'flex';
+            });
+        })();
+        // ── API ──
+        // Olvasó műveletek: a válasz a böngészőben tárolódik (sessionStorage), így a következő
+        // megnyitáskor AZONNAL megjelenik, a friss adat pedig a háttérben töltődik be.
+        // Bármilyen író művelet (leadás, törlés, mentés…) után a tárolt adatok törlődnek.
+        const OLVASO_MUVELETEK = new Set(['getStats', 'kezikonyvLista', 'sajatModositasok', 'adminJegyzokonyvek', 'adminSzolgalatok', 'adminOsszegzo']);
+        // csak lekérdeznek, de nem tároljuk őket (szerkeszthető mezők vannak bennük) – ezek NEM törlik a tárolt adatokat
+        const NEM_IRO = new Set(['adminDolgozok', 'adminModositasok', 'listDolgozok', 'checkUser', 'login']);
+        const CACHE_ELO = 'rzc:';
+        const _futo = new Map();
+        function cacheTorol() {
+            try { Object.keys(sessionStorage).forEach(k => { if (k.indexOf(CACHE_ELO) === 0) sessionStorage.removeItem(k); }); } catch (e) {}
+        }
+        async function apiHivas(payload) {
+            const kulcs = JSON.stringify(payload);
+            const olvaso = OLVASO_MUVELETEK.has(payload.action);
+            if (olvaso && _futo.has(kulcs)) return _futo.get(kulcs);   // ugyanaz a kérés már úton van
+            const ig = (async function () {
+                const ctl = new AbortController();
+                const idozito = setTimeout(() => ctl.abort(), 25000);
+                try {
+                    const res = await fetch(WEBHOOK_URL, { method: 'POST', body: kulcs, signal: ctl.signal });
+                    const adat = await res.json();
+                    if (!olvaso && !NEM_IRO.has(payload.action) && adat && adat.ok) cacheTorol();   // írás után minden tárolt adat elavult
+                    return adat;
+                } finally { clearTimeout(idozito); }
+            })();
+            if (olvaso) { _futo.set(kulcs, ig); ig.finally(() => _futo.delete(kulcs)); }
+            return ig;
+        }
+        // kesz(adat) kétszer is meghívódhat: először a tárolt adattal (azonnal), majd a frissel, ha változott
+        async function apiOlvas(payload, kesz) {
+            const k = CACHE_ELO + JSON.stringify(payload);
+            let regi = null;
+            try { regi = sessionStorage.getItem(k); } catch (e) {}
+            if (regi) { try { kesz(JSON.parse(regi)); } catch (e) { regi = null; } }
+            try {
+                const uj = await apiHivas(payload);
+                const s = JSON.stringify(uj);
+                if (uj && uj.ok) { try { sessionStorage.setItem(k, s); } catch (e) {} }
+                if (s !== regi) kesz(uj);
+            } catch (err) {
+                if (!regi) throw err;
+            }
+        }
+        function percSzoveg(p) { p = Math.round(p || 0); const o = Math.floor(p / 60), m = p % 60; return o > 0 ? (o + ' óra' + (m ? ' ' + m + ' perc' : '')) : (m + ' perc'); }
+        function uzenet(el, szoveg, siker) {
+            el.textContent = szoveg;
+            el.className = 'form-msg show ' + (siker ? 'ok' : 'err');
+        }
+        function ervenyesDatum(s) {
+            return /^\s*\d{4}\/\d{1,2}\/\d{1,2}\s*-\s*\d{1,2}:\d{2}\s*$/.test(s);
+        }
+        // ── BTK ADATOK (HRPC | Büntető Törvénykönyv – Google Sheets alapján) ──
+        // Mezők: p = paragrafus, n = megnevezés, b = bírság (Ft) – szám, vagy [min, max] ha sávos,
+        //        l = letöltendő (perc) – szám vagy [min, max], r = rövidítés, d = leírás,
+        //        o = óvadék (true = adható, false = nem adható, nincs = nem releváns),
+        //        fej = csak csoportcím (nem választható), s = szakaszcím
+        const BTK = [
+            { s: 'Közlekedési szabálysértések' },
+            { p: '1', n: 'Forgalom feltartása', b: 18200, r: 'FF', d: 'Forgalom feltartásának minősül minden olyan cselekedet, mely az úttest valamely forgalmi sávjában történő egyenletes haladást vagy előzést indokolatlanul hátráltatja vagy megakadályozza.' },
+            { p: '2', n: 'Gondatlan vezetés', b: 15600, r: 'GV', d: 'Aki a közúti közlekedés szabályainak megszegésével más vagy mások életét vagy testi épségét veszélynek tenné ki, viszont az adott helyzetben ez a veszély nem áll fenn. Nem osztható együtt a „Közúti veszélyeztetés” tétellel.' },
+            { p: '3', n: 'Jogosítvány nélküli vezetés', b: 29900, r: 'JNV', d: 'Aki járművet vezetői engedély nélkül vagy lejárt vezetői engedéllyel közúti forgalomban használ. Szintén büntetendő, ha a vezető rendelkezik érvényes engedéllyel, de ellenőrzéskor nem tudja bemutatni.' },
+            { p: '4', n: 'Állami szervezet tulajdonának megrongálása', b: 31200, r: 'ÁSZTM', d: 'Az a személy, aki szándékosan vagy gondatlanságból állami tulajdont rongál meg.' },
+            { p: '5', n: 'Bukósisak nélküli motor vezetés', b: 11700, r: 'BNMV' },
+            { p: '6', n: 'Jobbratartási kötelezettség megszegése', b: 11700, r: 'JKM' },
+            { p: '7', n: 'Kanyarodási szabályok megszegése', b: 11700, r: 'KSZM' },
+            { p: '8', n: 'Fényszóró használatának elmulasztása', b: 6240, r: 'FHE', d: 'Fényszóró használata este 6 és reggel 6 óra között, valamint rossz látási viszonyok között kötelező.' },
+            { p: '9', n: 'Kanyarodási szándék jelzésének elmulasztása', b: 6240, r: 'KSZJE' },
+            { p: '10', n: 'Körforgalmú útrend megsértése', b: 9100, r: 'KUM' },
+            { p: '11', n: 'Biztonsági öv becsatolásának elmulasztása', b: 6500, r: 'BÖE' },
+            { p: '12', n: 'Mobiltelefon használata vezetés közben', b: 39000, r: 'MHV' },
+            { p: '13', n: 'Autópálya leállósávján történő haladás', b: 23400, r: 'ALTH', d: 'Nem büntetendő, amennyiben műszaki hibás járművel az első lehajtóig / kijáratig csökkentett sebességgel halad.' },
+            { p: '14', n: 'Tilos jelzésen való áthaladás', r: 'TJV', fej: true },
+            { p: '14.1', n: 'Közúti jelzőlámpa esetén', b: 26000, r: 'TJVÁ' },
+            { p: '14.2', n: 'Vasúti átjáró esetén', b: 26000, r: 'VTJVÁ' },
+            { p: '15', n: 'Behajtani tilalom megsértése', b: 10400, r: 'BTM' },
+            { p: '16', n: 'Kötelező haladási irány megsértése', b: 15600, r: 'KHIM' },
+            { p: '17', n: 'Elsőbbségadás elmulasztása', b: 10400, r: 'ESH', d: 'Nem osztható együtt a „STOP tábla elmulasztása” tétellel.' },
+            { p: '18', n: 'STOP tábla elmulasztása', b: 15600, r: 'STFK', d: 'Nem osztható együtt az „Elsőbbségadás elmulasztása” tétellel.' },
+            { p: '19', n: 'Előzés szabályainak megsértése', b: 9100, r: 'ESM' },
+            { p: '20', n: 'Tilosban parkolás', b: 33800, r: 'TP', d: 'Tilos megállni vagy parkolni többek között megállni tilos zónában, gyalogátkelőhelyen, hídon, vasúti átjáróban, körforgalomban, valamint magánterületen a tulajdonos engedélye nélkül.' },
+            { p: '21', n: 'Parkolási rendelet megsértése', b: 23400, r: 'TPRM', d: 'Egy telken vagy magánterületen túl sok jármű tárolása, illetve jármű elhagyása vagy arra alkalmatlan / tiltott helyen való tárolása. Az elszállítás költsége a tulajdonost terheli.' },
+            { p: '22', n: 'Kötelező felszerelés hiánya', b: 35000, r: 'KFH', d: 'Kötelező felszerelések: elsősegélydoboz, elakadásjelző háromszög.' },
+            { p: '23', n: 'Forgalmi engedély hiánya', b: 26000, r: 'FEH', d: 'A járműnek nincs érvényes forgalmi engedélye, vagy a vezető nem tudja igazolni. Közúton és közparkolóban nem tárolható, a rendőrség a tulajdonos költségére elszállíttatja.' },
+            { p: '24', n: 'Lejárt forgalmi engedély', b: 19500, r: 'LFEH', d: 'A jármű forgalmi engedélye lejárt. Közúton és közparkolóban nem tárolható, a rendőrség a tulajdonos költségére elszállíttatja.' },
+            { p: '25', n: 'Érvénytelen forgalmi engedély', b: 16900, r: 'ÉFEH', d: 'A forgalmi engedély adatai nem egyeznek a járművel (pl. szín, tulajdonos, átalakítás). Ha csak a tulajdonos változott, 1 nap türelmi idő jár.' },
+            { p: '26', n: 'Rongált járművel való közlekedés', b: 7150, r: 'RJVK', d: 'Sérült karosszériaelemekkel (lökhárító, ajtó, csomagtartó, motorháztető, lámpa) való közlekedés. Minden sérült elem után további bírság jár.' },
+            { p: '27', n: 'Nem megfelelő műszaki állapotú jármű használata', b: 16250, r: 'NMJVK', d: 'Aki nem megfelelő műszaki állapotú járművet használ (műszaki vizsgán valamilyen hiba miatt nem felelne meg).' },
+            { p: '28', n: 'KRESZ szabálypont megsértése', b: 16900, r: 'KSZTM', d: 'Minden olyan egyéb, a KPM-BM rendelet alapján hatályos szabály, melyre ez a törvény nem tér ki.' },
+            { p: '29', n: 'Járműre szerelt illegális alkatrész', r: '', fej: true },
+            { p: '29.1', n: 'Színes fényszóró', b: 32500, r: 'IAGSZF', d: 'Kizárólag a műszaki vizsga előírásaiban engedélyezett fényszóró szerelhető fel.' },
+            { p: '29.2', n: 'Neon', b: 33800, r: 'IAGSZN', d: 'Tilos a járműre szerelt neoncsövet közúti közlekedésben vagy közforgalom elől el nem zárt magánúton menet közben használni.' },
+            { p: '29.3', n: 'Nitro', b: 35100, r: 'IAGSZO' },
+            { p: '30', n: 'Gyorshajtás', b: 50000, r: 'GYH', d: 'Minden +10 km/h gyorshajtás esetén az alapbírsághoz hozzá kell adni 5 000 Ft-ot.' },
+
+            { s: 'Szabálysértések' },
+            { p: '31', n: 'Személyazonosító igazolvány hiánya', b: 9100, r: 'SZIH' },
+            { p: '32', n: 'Csendháborítás', b: 31200, r: 'CSB', d: 'Lakossági panasz esetén este 22 óra és reggel 8 óra között.' },
+            { p: '33', n: 'Közrend megzavarása', b: 10400, r: 'KMR', d: 'Aki közterületen az alapvető viselkedési normákat nem tartja be, vagy koldul. Nem osztható együtt a „Garázdaság” tétellel.' },
+            { p: '34', n: 'Közterületen történő alkoholfogyasztás', b: 9100, r: 'KTA', d: 'Aki közterületen alkoholtartalmú italt fogyaszt.' },
+            { p: '35', n: 'Dohányzás tiltott területen', b: 9100, r: 'DTT', d: 'Tilos dohányozni minden közintézményben és annak területén, buszmegállóban, valamint ahol ezt tábla jelzi.' },
+            { p: '36', n: 'Hivatalos személlyel szembeni tiszteletlenség', b: 11700, r: 'HSZSZT', d: 'Aki rendőrt, katonát vagy egyéb hivatalos személyt sérteget.' },
+            { p: '37', n: 'Közvagyon megrongálása', b: 3250, r: 'KM', d: 'Aki oszlopot, póznát, buszmegállót rongál meg. Minden más tárgy esetében a „Rongálás” tételt kell alkalmazni.' },
+            { p: '38', n: 'Diszkrimináció', r: 'DK', fej: true, d: 'Aki mást faji, vallási, szexuális vagy bármilyen más hovatartozása miatt hátrányosan kezel.' },
+            { p: '38.1', n: 'Magánszemélyként', b: 15600, r: 'DKM' },
+            { p: '38.2', n: 'Cégként', b: 32500, r: 'DKC' },
+            { p: '39', n: 'Állami szerv indokolatlan hívása', b: 19500, r: 'ÁSZH', d: 'Állami szerv indokolatlan helyszínre hívása, vagy a hívás le nem mondása, ha már nincs rá szükség. Egységenkénti kivonulási díj és megtévesztő hívás esetén külön díj számítható fel.' },
+
+            { s: 'Vétségek' },
+            { p: '40', n: 'Közúti baleset okozása', r: 'KBO', fej: true, d: 'Aki a közúti közlekedés szabályainak megsértésével másnak vagy másoknak gondatlanságból kárt okoz.' },
+            { p: '40.1', n: 'Személyi sérülés nélkül', b: 45500, r: 'KBOSN' },
+            { p: '40.2', n: 'Személyi sérüléssel', b: 52000, r: 'KBOS' },
+            { p: '40.3', n: 'Halálesetkor', b: 65000, l: 25, r: 'KBOH' },
+            { p: '41', n: 'Járművezetés tiltott átengedése', b: 19500, r: 'JTÁ', d: 'Aki tudatosan ittas, bódult vagy egyéb okból vezetésre alkalmatlan személynek engedi át gépjármű vezetését közúton vagy közforgalom elől el nem zárt magánúton.' },
+            { p: '42', n: 'Járművezetés befolyásoltság alatt', b: 40800, r: 'JBA', d: 'Aki földi, vasúti, légi vagy vízi járművet ittasan, bódult állapotban vagy egyéb vezetésre alkalmatlan állapotban vezet.' },
+            { p: '43', n: 'Garázdaság', r: 'GR', fej: true, d: 'Kihívóan közösségellenes, erőszakos magatartás, amely alkalmas arra, hogy másokban megbotránkozást vagy riadalmat keltsen. Nem osztható együtt a „Közrend megzavarása” tétellel.' },
+            { p: '43.1', n: 'Egyedül', b: 13000, r: 'GRM' },
+            { p: '43.2', n: 'Csoportosan', b: 20800, l: 10, r: 'GRCS' },
+            { p: '43.3', n: 'Köznyugalmat súlyosan megzavarva', b: 23400, l: 15, r: 'GRKSM' },
+            { p: '43.4', n: 'Felfegyverkezve', b: 26000, l: 25, r: 'GRFF' },
+            { p: '43.5', n: 'Fegyveresen', b: 26000, l: 30, r: 'GRF' },
+            { p: '43.6', n: 'Nyilvános rendezvényen', b: 39000, l: 30, r: 'GRNYR' },
+            { p: '44', n: 'Szeméremsértés', b: 26000, l: 10, r: 'KSZS', d: 'Aki magát nemi vágyának felkeltése vagy kielégítése céljából más előtt szeméremsértő módon mutogatja.' },
+            { p: '45', n: 'Hatóság félrevezetése', b: 39000, l: 20, r: 'HF', d: 'Aki tudatosan valótlan információt közöl a hatósággal. Egységenkénti kivonulási díj számítható fel, honvédelmi / terrorelhárítási szerv riasztása esetén magasabb díj.' },
+            { p: '46', n: 'Rendőri intézkedés megtagadása', r: 'RIM', fej: true, d: 'Aki a hatóság utasítása ellenére nem áll meg, vagy jogszerű intézkedés alól próbálja kivonni magát.' },
+            { p: '46.1', n: 'Járművel', b: 78000, l: 30, r: 'RIMJ' },
+            { p: '46.2', n: 'Gyalogosan', b: 39000, l: 25, r: 'RIMGY' },
+            { p: '47', n: 'Rendőri utasítás megtagadása', b: 20800, l: 20, r: 'RUM', d: 'Járműben az első felszólítás, intézkedés vagy terület lezárása során a második felszólítás után sem követi a rendőri utasítást. Aki nem lépett be a lezárt területre, nem utasítható annak elhagyására.' },
+            { p: '48', n: 'Hivatali személlyel szembeni erőszak', b: 52000, l: 60, r: 'HSZSZE' },
+            { p: '49', n: 'Gazdasági bűncselekmény', r: 'GB', fej: true, d: 'Aki idegen dolgot jogtalanul eltulajdonít, haszonszerzés végett tévedésbe ejt, vagy próbál ejteni.' },
+            { p: '49.1', n: 'Kis értékre (10 000 Ft – 45 000 Ft)', b: 78000, l: 15, r: 'GBK' },
+            { p: '49.2', n: 'Nagy értékre (45 001 Ft – 100 000 Ft)', b: 143000, l: 20, r: 'GBN' },
+            { p: '49.3', n: 'Jelentős értékre (100 001 Ft – 200 000 Ft)', b: 195000, l: 30, r: 'GBJ' },
+            { p: '49.4', n: 'Különösen nagy értékre (200 001 Ft – 500 000 Ft)', b: 260000, l: 40, r: 'GBKN' },
+            { p: '49.5', n: 'Különösen jelentős értékre (500 001 Ft és afelett)', b: 300000, l: 60, r: 'GBKJ' },
+            { p: '50', n: 'Testi sértés', r: 'TS', fej: true },
+            { p: '50.1', n: 'Könnyű testi sértés', b: 52000, l: 30, r: 'TSK', d: '8 napon belül gyógyuló sérülés okozása.' },
+            { p: '50.2', n: 'Súlyos testi sértés', b: 78000, l: 40, r: 'TSS', d: '8 napon túl gyógyuló sérülés okozása.' },
+            { p: '51', n: 'Engedély nélküli behatolás', r: 'ENB', fej: true, d: 'Aki magán-, kormányzati, rendvédelmi vagy honvédelmi területre engedély nélkül bemegy, vagy ott engedély nélkül bent marad.' },
+            { p: '51.1', n: 'Kormányzati területre', b: 78000, l: 10, r: 'ENBK' },
+            { p: '51.2', n: 'Rendvédelmi / honvédelmi területre', b: 97500, l: 20, r: 'ENBR' },
+            { p: '51.3', o: true, n: 'Magánlaksértés', b: 78000, l: 10, r: 'EBHS' },
+            { p: '51.4', o: true, n: 'Magánterületre', b: 39000, l: 20, r: 'ENBM' },
+            { p: '52', n: 'Zaklatás', r: 'ZK', fej: true, d: 'Aki abból a célból, hogy mást megfélemlítsen, vagy más magánéletébe, illetve mindennapi életvitelébe önkényesen zavaróan beavatkozzon.' },
+            { p: '52.1', n: 'Egyedül', b: 32500, r: 'ZKM' },
+            { p: '52.2', o: true, n: 'Csoportosan', b: 39500, l: 25, r: 'ZKCS' },
+            { p: '52.3', o: true, n: 'Hozzátartozó fenyegetésével', b: 65000, l: 30, r: 'ZKHF' },
+            { p: '52.4', o: false, n: 'Hatalmi / befolyási helyzettel visszaélve', b: 97500, l: 60, r: 'ZKHB' },
+            { p: '53', n: 'Rágalmazás', r: 'RG', fej: true, d: 'Aki valakiről más előtt a becsület csorbítására alkalmas tényt állít, híresztel vagy ilyen tényre közvetlenül utaló kifejezést használ. Büntetendő továbbá, aki a becsület csorbítására alkalmas hang-, videófelvételt, dokumentumot állít elő. Nem büntethető az, aki valós tényt állít.' },
+            { p: '53.1', n: 'Magában', b: 31200, r: 'RGM' },
+            { p: '53.2', o: true, n: 'Aljas célból', b: 45500, l: 15, r: 'RGA' },
+            { p: '53.3', o: true, n: 'Nagy nyilvánosság előtt', b: 52000, l: 30, r: 'RGN' },
+            { p: '53.4', n: 'Jelentős érdeksérelmet okozva', b: 78000, l: 40, r: 'RGJ', o: false },
+            { p: '54', n: 'Hamis vádaskodás', r: 'HV', fej: true, d: 'Aki mást hatóság előtt vétség vagy bűncselekmény elkövetésével hamisan vádol.' },
+            { p: '54.1', n: 'Gondatlanságból', b: 39000, r: 'HVG' },
+            { p: '54.2', n: 'Szándékosan', b: 65000, l: 5, r: 'HVSZ', o: true },
+            { p: '54.3', n: 'Elítélték a sértettet', b: 65000, l: 10, r: 'HVAS', o: true },
+            { p: '54.4', n: 'Hamis bizonyítékot előállítva', b: 97500, l: 15, r: 'HVHB', o: false },
+            { p: '55', n: 'Hatósági eljárás megzavarása', b: 39000, l: 25, r: 'HEM', o: true, d: 'Aki magatartásával a hatóság eljárását megzavarja, akadályozza vagy meghiúsítja és ezt a tevékenységét felszólítást követően sem hagyja abba.' },
+            { p: '56', n: 'Zugírászat', b: 78000, l: 40, r: 'ZI', o: true, d: 'Aki jogosulatlanul és/vagy üzletszerűen ügyvédi, szabadalmi ügyvivői vagy közjegyzői tevékenységet végez. Minden ilyen jellegű irodát a Nemzeti Adó- és Vámhivatal Adóügyi osztályán be kell jelenteni.' },
+            { p: '57', n: 'Segítségnyújtás elmulasztása', r: 'SNE', fej: true, d: 'Aki nem nyújt tőle elvárható segítséget sérült vagy olyan személynek, akinek az élete vagy testi épsége közvetlen veszélyben van.' },
+            { p: '57.1', n: 'Magában', b: 19500, l: 5, r: 'SNEM', o: true },
+            { p: '57.2', n: 'Halálesetkor', b: 39000, l: 10, r: 'SNEH', o: true },
+            { p: '58', n: 'Rendbontás', r: 'RNB', fej: true, d: 'Aki nyilvános rendezvény vagy gyűlés szervezőjének vagy rendezőjének a rend fenntartása érdekében tett jogszerű intézkedésével szemben ellenállást tanúsít.' },
+            { p: '58.1', n: 'Egyedül', b: 13000, r: 'GRM' },
+            { p: '58.2', n: 'Csoportosan', b: 20800, l: 10, r: 'GRCS', o: true },
+            { p: '58.3', n: 'Felfegyverkezve', b: 23400, l: 25, r: 'GRKSM', o: true },
+            { p: '58.4', n: 'Fegyveresen', b: 26000, l: 40, r: 'GRFF', o: false },
+            { p: '59', n: 'Rongálás, lopás', r: 'RNGL', fej: true, d: 'Aki idegen vagyontárgy megsemmisítésével vagy megrongálásával kárt okoz.' },
+            { p: '59.1', n: 'Kis értékre (10 000 Ft – 45 000 Ft)', b: 78000, l: 25, r: 'RNGLK', o: true },
+            { p: '59.2', n: 'Nagy értékre (45 001 Ft – 100 000 Ft)', b: 143000, l: 30, r: 'RNGLN', o: true },
+            { p: '59.3', n: 'Jelentős értékre (100 001 Ft – 200 000 Ft)', b: 195000, l: 40, r: 'RNGLJ', o: true },
+            { p: '59.4', n: 'Különösen nagy értékre (200 001 Ft – 500 000 Ft)', b: 260000, l: 40, r: 'RNGLKN', o: false },
+            { p: '59.5', n: 'Különösen jelentős értékre (500 001 Ft és afelett)', b: 300000, l: 60, r: 'RNGLKJ', o: false },
+            { p: '60', n: 'Okirattal való visszaélés', r: 'OV', fej: true, d: 'Aki egy vagy több olyan közokiratot, amely nem vagy nem kizárólag a sajátja, megszerez, megsemmisít, megrongál vagy tulajdonosa elől eltitkolja. Büntetendő továbbá bármilyen okirat átruházása másra, azok árusítása. (Amennyiben az iratot használta, az Okirathamisítás vádpontot kell alkalmazni!)' },
+            { p: '60.1', n: 'Irat birtoklása', b: 32500, l: 15, r: 'OVB', o: true },
+            { p: '60.2', n: 'Irat árusítása', b: 60000, l: 20, r: 'OVÁ', o: true },
+            { p: '61', n: 'Pirotechnikai eszköz forgalmazása / felhasználása', b: 78000, l: 30, r: 'PFJ', o: true, d: 'Pirotechnikai eszköz (pl. petárda, tűzijáték stb.) hatósági engedély nélkül felhasználható minden év november 20. – január 20. között. Ezen eszközök árusítása kizárólag külön engedéllyel rendelkező boltok számára engedélyezett. Rendezvényekhez és egyéb magánünnepségekhez a fenti időponton kívül a Katasztrófavédelem adhat engedélyt felhasználásra.' },
+            { p: '62', n: 'Személyes adattal való visszaélés', b: 36000, l: 25, r: 'SZAVV', o: true, d: 'Aki a személyes adatok védelméről / kezeléséről nem megfelelően gondoskodik, azokat a céltól eltérően kezeli vagy olyan személy részére bocsájt ki adatot, mely egy személyt / céget hátrányosan érint.' },
+            { p: '63', n: 'Illegális anyagok gyártásának előkészülete', b: 84500, l: 25, r: 'IAE', o: true, d: 'Aki olyan anyagok gyártására tesz előkészületet, melyet a törvény tilt, vagy olyan anyagot próbál készíteni, melynek gyártása engedélyköteles. (Pl. kábítószer, gyógyszer stb.)' },
+            { p: '64', n: 'Öngyilkossági kísérlet', b: 65000, l: 10, r: 'KSZA', o: true },
+
+            { s: 'Bűncselekmények' },
+            { p: '65', n: 'Cserbenhagyás', b: 52000, l: 25, r: 'CSH', o: true, d: 'Ha a közlekedési balesettel érintett jármű vezetője a helyszínen nem áll meg, illetve onnan eltávozik, mielőtt meggyőződne arról, hogy valaki megsérült-e, illetve az életét vagy testi épségét közvetlenül fenyegető veszély miatt segítségnyújtásra szorul-e. Amennyiben az illető meggyőződött arról, hogy segítségnyújtásra van szükség, ám ennek érdekében semmit sem tett, úgy a „Segítségnyújtás elmulasztása” tételt kell alkalmazni. Körözés kizárólag akkor adható ki, amennyiben terhelő bizonyíték van az elkövetővel szemben. (Videó / kép)' },
+            { p: '66', n: 'Közúti veszélyeztetés', r: 'KV', fej: true, d: 'Aki a közúti közlekedés szabályainak megszegésével közúton vagy közforgalom elől el nem zárt magánúton más vagy mások életét vagy testi épségét közvetlen veszélynek teszi ki. Illetve aki a közutat vagy a közúti jelzést megrongálja, beszennyezi, vagy a közútra a közlekedés biztonságát, zavartalanságát hátrányosan befolyásoló tárgyat juttat.' },
+            { p: '66.1', n: 'Személy sérülés nélkül', b: 39000, l: 15, r: 'KVSN', o: true },
+            { p: '66.2', n: 'Személy sérüléssel', b: 52000, l: 30, r: 'KVSE', o: true },
+            { p: '66.3', n: 'Halálesetkor', b: 78000, l: 40, r: 'KVH', o: true },
+            { p: '66.4', n: 'Akadály létesítés, közúti jelzés eltávolítása', b: 26000, r: 'KVA' },
+            { p: '67', n: 'Illegális tárgy birtoklása', r: 'ITB', fej: true, d: 'Aki olyan tárgyat birtokol, amely a magyar jogszabály szerint nem legális, bejelentése szükséges, vagy engedélyköteles.' },
+            { p: '67.1', n: 'Illegális lőszer birtoklás', b: 39000, l: 30, r: 'ITBL', o: true, d: 'Aki illegális lőszert birtokol, vagy lejárt fegyverengedéllyel, vagy anélkül birtokolja.' },
+            { p: '67.2', n: 'Bejelentett maroklőfegyver', b: 52000, l: 30, r: 'ITBBM', o: true, d: 'Aki lejárt fegyverengedéllyel, vagy anélkül birtokolja.' },
+            { p: '67.3', n: 'Illegális maroklőfegyver', b: 78000, l: 40, r: 'ITBIM', o: true },
+            { p: '67.4', n: 'Illegális gépkarabély', b: 120000, l: 60, r: 'ITBGK', o: false },
+            { p: '67.5', n: 'Illegális géppuska', b: 120000, l: 60, r: 'ITBGP', o: false },
+            { p: '67.6', n: 'Illegális egyéb életkioltásra alkalmas eszköz', b: 52000, l: 30, r: 'ITB', o: true, d: '8 cm-nél hosszabb szúró-vágó eszköz miatt már büntetendő. CSAK ÉS KIZÁRÓLAG közterületen való hordásért osztható!' },
+            { p: '67.7', n: 'Pszichoaktív szerek birtoklás', b: 78000, l: 25, r: 'ITBEA', o: true, d: 'Ismeretlen típusú kábítószer birtoklása. Kábítószer birtoklással nem osztható.' },
+            { p: '67.8', n: 'Kábítószer birtoklás', b: 78000, l: 35, r: 'ITBK', o: true, d: 'Ismert kábítószer birtoklása. Pszichoaktív szerek birtoklással nem osztható. Ismert szerek: kokain, fű, marihuána, heroin.' },
+            { p: '68', n: 'Illegális tárggyal való kereskedelem', r: 'ITVK', fej: true, d: 'Aki olyan tárggyal kereskedik, amely a magyar jogszabály szerint nem legális, bejelentése szükséges, vagy engedélyköteles.' },
+            { p: '68.1', n: 'Lőszerkereskedelem', b: 78000, l: 35, r: 'ITVKL', o: true },
+            { p: '68.2', n: 'Fegyverkereskedelem', b: 96000, l: 40, r: 'ITVKF', o: false },
+            { p: '68.3', n: 'Pszichoaktív szerekkel való kereskedelem', b: 120000, l: 40, r: 'ITVKP', o: false },
+            { p: '68.4', n: 'Kábítószer-kereskedelem', b: 120000, l: 40, r: 'ITVKK', o: false },
+            { p: '69', n: 'Illegális tárgy használata / fogyasztása', r: 'ITH', fej: true, d: 'Aki olyan tárgyat használ vagy fogyaszt, amely a magyar jogszabály szerint nem legális, bejelentése szükséges, vagy engedélyköteles.' },
+            { p: '69.1', n: 'Pszichoaktív szerek fogyasztása', b: 78000, l: 30, r: 'ITHP', o: true },
+            { p: '69.1', n: 'Kábítószer fogyasztása', b: 78000, l: 30, r: 'ITHK', o: true },
+            { p: '69.2', n: 'Fegyver használata', b: 96000, l: 40, r: 'ITHF', o: false, d: 'Csak abban az esetben osztható, amennyiben nem önvédelem céljából, bármilyen élet kioltására alkalmas eszköz használata történik.' },
+            { p: '70', n: 'Illegális tárgy előállítás', b: 120000, l: 40, r: 'ITE', o: true, d: 'Aki olyan tárgyat állít elő vagy készít, amely a magyar jogszabály szerint nem legális, bejelentése szükséges, vagy engedélyköteles. Ide tartozik a fegyverkészítés, és a pszichoaktív, illetve kábítószer előállítása.' },
+            { p: '71', n: 'Emberölés', r: 'EB', fej: true },
+            { p: '71.1', n: 'Emberölési kísérlet', b: 156000, l: 30, r: 'EBK', o: false },
+            { p: '71.2', n: 'Emberölési kísérlet hivatali személlyel szemben', b: 195000, l: 40, r: 'EBKHHSZSZ', o: false },
+            { p: '71.3', n: 'Gyilkosság', b: 234000, l: 40, r: 'GYK', o: false },
+            { p: '71.4', n: 'Hivatali személy megölése', b: 260000, l: 60, r: 'HSZMG', o: false },
+            { p: '72', n: 'Rablás', r: 'RB', fej: true },
+            { p: '72.1', n: 'Egyedül', b: 165000, l: 25, r: 'RBE', o: true },
+            { p: '72.2', n: 'Csoportosan', b: 180000, l: 40, r: 'RBCS', o: false, d: '3 főtől csoportos.' },
+            { p: '72.3', n: 'Fegyveresen', b: 180000, l: 40, r: 'RBF', o: false },
+            { p: '72.4', n: 'Halálesetkor', b: 150000, l: 60, r: 'RBH', o: true },
+            { p: '73', n: 'Emberrablás', r: 'ER', fej: true },
+            { p: '73.1', n: 'Egyedül', b: 165000, l: 25, r: 'ERM', o: true },
+            { p: '73.2', n: 'Csoportosan', b: 180000, l: 40, r: 'ERCS', o: false, d: '3 főtől csoportos.' },
+            { p: '73.3', n: 'Fegyveresen', b: 180000, l: 40, r: 'ERF', o: false },
+            { p: '73.4', n: 'Halálesetkor', b: 150000, l: 60, r: 'ERH', o: true },
+            { p: '74', n: 'Bankrablás', r: 'BRE', fej: true },
+            { p: '74.1', n: 'Egyedül', b: 165000, l: 25, r: 'BRE', o: true },
+            { p: '74.2', n: 'Csoportosan', b: 180000, l: 40, r: 'BRCS', o: false, d: '3 főtől csoportos.' },
+            { p: '74.3', n: 'Fegyveresen', b: 180000, l: 40, r: 'BRF', o: false },
+            { p: '74.4', n: 'Halálesetkor', b: 150000, l: 60, r: 'BRH', o: true },
+            { p: '76', n: 'Jármű önkényes elvétele', b: 90000, l: 10, r: 'JÖE', o: true, d: 'Aki idegen gépi meghajtású járművet mástól azért vesz el, hogy jogtalanul használja, vagy az így elvett, illetve a rábízott ilyen járművet jogtalanul használja. (Itt a rábízott járműről van szó, pl. bérelt, céges stb. Lopott járműnél lopást kell osztani.)' },
+            { p: '77', n: 'Bitorlás', b: 120000, l: 25, r: 'BTR', o: true, d: 'Aki más szellemi alkotását sajátjaként tünteti fel, és ezzel a jogosultnak vagyoni hátrányt okoz.' },
+            { p: '78', n: 'Információs rendszer vagy adat megsértése', b: 250000, l: 40, r: 'IRM', o: false, d: 'Aki információs rendszerbe az információs rendszer védelmét biztosító technikai intézkedés megsértésével vagy kijátszásával jogosulatlanul belép, vagy a belépési jogosultsága kereteit túllépve vagy azt megsértve bent marad, abban adatot másít, töröl, hozzáférhetetlenné tesz. Büntetendő továbbá a cselekmény elősegítése, valamint annak feljelentésének elmulasztása. (Hackelés és/vagy jogosultság átlépés útján történő hozzáférés, adatmódosítás, törlés stb.)' },
+            { p: '79', n: 'Vesztegetés', r: 'VSZ', fej: true, d: 'Aki cég/szervezet részére vagy érdekében tevékenységet végző személynek vagy rá tekintettel másnak bármilyen előnyt, vagyontárgyat felkínál annak érdekében, hogy valamit tegyen, ne tegyen, eltűrjön. Továbbá annak a cégnek/szervezetnek tulajdonosa, alkalmazottja, aki a vesztegetést elfogadja.' },
+            { p: '79.1', n: 'Felkínálása', b: 100000, l: 30, r: 'VSZF', o: false },
+            { p: '79.2', n: 'Elfogadása', b: 300000, l: 60, r: 'VSZE', o: false },
+            { p: '80', n: 'Szexuális erőszak', b: 230000, l: 40, r: 'SZE', o: false, d: 'Aki a szexuális kényszerítést erőszakkal, illetve az élet vagy testi épség elleni közvetlen fenyegetéssel követi el, és/vagy más védekezésre vagy akaratnyilvánításra képtelen állapotát szexuális cselekményre használja fel.' },
+            { p: '81', n: 'Szexuális kényszerítés', b: 210000, l: 40, r: 'SZK', o: false, d: 'Aki mást szexuális cselekményre vagy annak eltűrésére kényszerít. Nem osztható együtt a „Szexuális erőszak” és „Prostitúció” tételekkel.' },
+            { p: '82', n: 'Kerítés', b: 150000, l: 30, r: 'KT', o: true, d: 'Aki haszonszerzés céljából valakit szexuális cselekmény végzésére másnak megszerez.' },
+            { p: '83', n: 'Prostitúció', r: 'PR', fej: true, d: 'Aki haszonszerzés vagy előny céljából szexuális cselekményt végez, vagy mást erre rábír, ezt elősegíti. Illetve aki épületet, személyeket vagy bármilyen más vagyontárgyat ezek céljára rendelkezésre bocsájt.' },
+            { p: '83.1', n: 'Elkövetése', b: 20800, l: 10, r: 'PRET', o: true },
+            { p: '83.2', n: 'Elősegítése', b: 18400, l: 10, r: 'PREG', o: true, d: 'Aki a bűncselekmény elkövetését elősegíti épület vagy magánterület rendelkezésre bocsájtásával.' },
+            { p: '84', n: 'Hatósági rendelkezés elleni uszítás', b: 120000, l: 30, r: 'HREU', o: true, d: 'Aki nagy nyilvánosság előtt, a köznyugalom megzavarására alkalmas módon hatóság rendelkezése ellen általános engedetlenségre uszít.' },
+            { p: '85', n: 'Önbíráskodás', b: 65000, l: 15, r: 'ÖB', o: true, d: 'Aki abból a célból, hogy jogos vagy jogosnak vélt vagyoni igénynek érvényt szerezzen, mást erőszakkal vagy fenyegetéssel arra kényszerít, hogy valamit tegyen, ne tegyen vagy eltűrjön.' },
+            { p: '86', n: 'Bűnszervezetben való részvétel', b: 560000, l: 60, r: 'BVR', o: false, d: '(Maffia, kartell, banda, bűnhálózat vezetője, tagja stb., és ez kiderül IC.)' },
+            { p: '87', n: 'Hamis tanúzás', b: 27500, l: 15, r: 'HT', o: true, d: 'Az a tanú, aki a hatóság előtt valótlant állít, vagy a valóságot elhallgatja.' },
+            { p: '88', n: 'Nyomozás hátráltatása / akadályoztatása', b: 210000, l: 60, r: 'NYH', o: true, d: 'Aki egy nyomozást hátráltat, akadályoz vagy szándékosan meghiúsít.' },
+            { p: '89', n: 'Öngyilkosságban közreműködés', b: 335000, l: 40, r: 'ÖNKK', o: false, d: 'Aki mást öngyilkosságra rábír, vagy ennek elkövetéséhez segítséget nyújt.' },
+            { p: '90', n: 'Kényszerítés', b: 135000, l: 28, r: 'KNSZ', o: false, d: 'Aki mást erőszakkal vagy fenyegetéssel arra kényszerít, hogy valamit tegyen, ne tegyen vagy eltűrjön. Illetve aki mást kiszolgáltatott élethelyzetének kihasználásával arra bír rá, hogy megalázó magatartást tanúsítson.' },
+            { p: '91', n: 'Minősített adattal való visszaélés', b: 420000, l: 40, r: 'MAVV', o: false, d: 'Aki minősített adatot jogosulatlanul megszerez, megmásít vagy felhasznál, jogosulatlan személy részére hozzáférhetővé vagy jogosult személy részére hozzáférhetetlenné tesz. Azt a hivatalos személyt, aki hivatali helyzetével visszaélve követi el a bűncselekményt, haladéktalanul fel kell függeszteni.' },
+            { p: '92', n: 'Ügyvédi visszaélés', b: 220000, l: 40, r: 'ÜVSZ', o: true, d: 'Az az ügyvéd, aki ügyfelének jogtalan hátrányt okoz.' },
+            { p: '93', n: 'Fogolyszökés', b: 190000, l: 40, r: 'FSZ', o: false, d: 'Az a fogvatartott, aki a büntetés letöltését megelőzően jogosulatlanul elhagyja a fogdát.' },
+            { p: '94', n: 'Fogolyszöktetés', b: 220000, l: 40, r: 'FSZK', o: false, d: 'Az a személy vagy hivatalos személy, aki jogosulatlanul lehetővé teszi egy fogvatartott számára a büntetés letöltését megelőzően, hogy elhagyja a fogdát.' },
+            { p: '95', n: 'Rendőrnek való kiadás', b: 75000, l: 30, r: 'RVK', o: false, d: 'Az a magánszemély, aki magát rendőrnek adja ki, vagy rendőr tábornoki engedély nélkül hajt végre rendőrség által végzett feladatokat, például közúti ellenőrzést, előállítást, ezzel egy másik polgár szabadságát korlátozva.' },
+            { p: '96', n: 'Illegális rendezvény', r: 'IR', fej: true, d: 'Az, aki előzetes engedély nélkül állami területen rendezvényt szervez, illetve aki ezen a rendezvényen részt vesz. Illegális rendezvénynek kell tekinteni azt a rendezvényt is, amelyet a hatóság a közrendre való tekintettel feloszlat.' },
+            { p: '96.1', n: 'Szervezése', b: 155000, l: 25, r: 'IRSZ', o: true },
+            { p: '96.2', n: 'Részvétel', b: 62500, l: 10, r: 'IRVR', o: true },
+            { p: '97', n: 'Terrorcselekmény', b: 450000, l: 40, r: 'TRCS', o: false, d: 'Aki abból a célból, hogy állami szervet vagy nemzetközi szervezetet arra kényszerítsen, hogy valamit tegyen, ne tegyen vagy eltűrjön, a lakosságot megfélemlítse, az állam társadalmi vagy gazdasági rendjét megváltoztassa vagy megzavarja. Továbbá büntetendő az, aki a terrorcselekményhez bármilyen anyagi javakkal, tulajdonnal vagy személyekkel hozzájárul. Bűnrészes is teljes büntetési tételt kap. Enyhítésre, vádalkura / egyezségre nincs lehetőség! (Az emberrablásnál kért váltságdíj miatt nem tartozik ide.) [TEK FOGJA EL] [RENDŐRSÉG NYOMOZÓI VÉGZIK A KIHALLGATÁST] [ELŐÁLLÍTÁST TEK INTÉZI]' },
+
+            { s: 'Gazdasági bűncselekmények' },
+            { p: '98', n: 'Adócsalás', b: 75000, l: 40, r: 'ACS', o: false, d: 'Az a személy, aki adóilleték befizetését próbálja elkerülni, vagy hamisan szolgáltat információt az adózásával kapcsolatban az adóhatóság felé.' },
+            { p: '99', n: 'Illegális munkavállalás', b: 15000, l: 20, r: 'IMV', o: true, d: 'Az a személy, aki olyan cégnél vagy társaságnál vállal haszonszerzés érdekében munkát, ahol tudatában van annak, hogy nem jelentik be az adóhatóság felé, vagy a bérének egy részét vagy egészét nem jelentik be az adóhatóság felé.' },
+            { p: '100', n: 'Bejegyzetlen cég működtetése', b: 47500, l: 35, r: 'BCM', o: true, d: 'Az a személy, aki olyan céget vagy társaságot működtet, melyet nem jelent be a NAV irányába.' },
+            { p: '101', n: 'ÁFÁ-s számla kiállításának elmulasztása', b: 60000, r: 'SZKE', d: 'Az a személy, aki törvényi kötelezettsége végett köteles egy azonos szolgáltatásról, szerződés létrejöttéről számlát kiállítani, és ezt elmulasztja. Amennyiben már létrejött szerződés alapján történik a munkavégzés, vagy a munkavégzés összege NULLA, nem kell kiállítani számlát.' },
+            { p: '102', n: 'Sikkasztás', b: 175000, l: 40, r: 'SK', o: false, d: 'Aki a rábízott idegen dolgot jogtalanul eltulajdonítja, vagy azzal sajátjaként rendelkezik.' },
+            { p: '103', n: 'Gazdasági csalás', b: 225000, l: 20, r: 'GCSLS', o: true, d: 'Aki jogtalan haszonszerzés végett színlelt gazdasági tevékenységet végez, és ezzel vagyoni hátrányt okoz.' },
+            { p: '104', n: 'Költségvetési csalás', b: 125000, l: 40, r: 'KCSLS', o: false, d: 'Aki a költségvetésbe történő befizetési kötelezettség vagy költségvetésből származó pénzeszközök vonatkozásában mást tévedésbe ejt, tévedésben tart, valótlan tartalmú nyilatkozatot tesz, vagy a valós tényt elhallgatja. Költségvetésbe történő befizetési kötelezettséggel kapcsolatos kedvezményt jogtalanul vesz igénybe, vagy költségvetésből származó pénzeszközöket a jóváhagyott céltól eltérően használ fel, és ezzel egy vagy több költségvetésnek vagyoni hátrányt okoz. Továbbá büntetendő, aki a költségvetési csalással kapcsolatos bűncselekményt elmulasztja bejelenteni az adóhatóság irányába.' },
+            { p: '105', n: 'Pénzmosás', b: 150000, l: 30, r: 'PZM', o: false, d: 'Aki a büntetendő cselekményből származó vagyon eredetét, a vagyonon fennálló jogot, a vagyon helyét, ezek változását elfedi vagy elleplezi. Továbbá büntetendő, aki a pénzmosással kapcsolatos bűncselekményt elmulasztja bejelenteni az adóhatóság irányába. (Számvitel rendjének megsértésével együtt nem osztható.)' },
+            { p: '106', n: 'Üzleti titok megsértése', b: 150000, l: 40, r: 'ÜTM', o: true, d: 'Aki jogtalan előnyszerzés végett, vagy másnak vagyoni hátrányt okozva üzleti titkot jogosulatlanul megszerez, felhasznál, más személy részére hozzáférhetővé tesz vagy nyilvánosságra hoz.' },
+            { p: '107', n: 'Versenytárs utánzása', b: 120000, l: 30, r: 'VTU', o: true, d: 'Aki a versenytárs hozzájárulása nélkül árut olyan jellegzetes külsővel, csomagolással, megjelöléssel vagy elnevezéssel állít elő, amelyről a versenytárs vagy annak jellegzetes tulajdonsággal rendelkező áruja ismerhető fel, vagy ilyen árut forgalomba hozatal céljából megszerez, tart, vagy forgalomba hoz.' },
+            { p: '108', n: 'Gazdasági adatszolgáltatási kötelezettség elmulasztása', b: 110000, l: 20, r: 'GAKE', o: true, d: 'Az a cégbejelentő vagy cégjegyzék módosítására jogosult személy, aki szándékosan hamis információkat szolgáltat az adóhatóság felé annak érdekében, hogy a céget, annak vezetőségét vagy alkalmazottait ne lehessen fellelni. Büntetendő továbbá, aki változás esetén nem jelenti be a pontos változásokat az adóhatóság felé annak érdekében, hogy a céget, annak vezetőségét vagy alkalmazottait ne lehessen fellelni.' },
+            { p: '109', n: 'Fogyasztók, vásárlók megtévesztése', b: 120000, l: 15, r: 'FVM', o: false, d: 'Aki egy szolgáltatást, terméket úgy híresztel, ad elő, hogy az alkalmas a fogyasztókat, vásárlókat megtéveszteni.' },
+            { p: '110', n: 'Tartozás fedezetének elvonása', b: 230000, l: 20, r: 'TFE', o: false, d: 'Aki írásbeli szerződés alapján fennálló követelés fedezetéül szolgáló vagyont részben vagy egészben elvonja, és ezzel a tartozás kiegyenlítését részben vagy egészben meghiúsítja.' },
+            { p: '111', n: 'Szerződésszegés', b: 65000, r: 'SZSZ', d: 'Az a személy/cég, aki egy másik természetes személlyel vagy céggel kötött szerződést nem tart be, megsért, vagy jogosulatlanul felbont. Cég esetében minden esetben a tulajdonost/igazgatót terheli a tétel.' },
+            { p: '112', n: 'Bejelentetlen egyéni vállalkozó foglalkoztatása', b: 35000, l: 20, r: 'BEVF', o: true, d: 'Az a cégtulajdonos, akinek az alkalmazottja bejelentetlenül végzi a tevékenységét.' },
+            { p: '113', n: 'Költségvetési csaláshoz kapcsolódó felügyeleti vagy ellenőrzési kötelezettség elmulasztása', b: 220000, l: 25, r: 'FVEKE', o: false, d: 'Az a pénzügyőr, aki felügyeleti vagy ellenőrzési kötelezettségét elmulasztja, és ezzel költségvetési csalást tesz lehetővé.' },
+            { p: '114', n: 'Cégjegyzékkel kapcsolatos információk jogosulatlan módosítása', b: 92500, l: 20, r: 'IJM', o: false, d: 'Az a pénzügyőr, aki jogosulatlanul módosít cégjegyzékkel kapcsolatos információt.' },
+
+            { s: 'Hivatali bűncselekmények' },
+            { p: '115', n: 'Parancs megtagadása', b: 500000, l: 60, r: 'PM', o: false, d: 'Az a hivatali személy, valamint hadköteles, aki felettesének jogszerű utasítását megtagadja. Bűncselekmény elkövetésére adott parancsot mindenki köteles megtagadni, és lépéseket tenni a parancsot kiosztó személlyel szemben!' },
+            { p: '116', n: 'Szolgálati lőfegyverrel való visszaélés', b: 300000, l: 40, r: 'SZLV', o: false, d: 'Az a hivatali személy, valamint hadköteles, aki szolgálati lőfegyverével bármilyen módon visszaél.' },
+            { p: '117', n: 'Függelemsértés', b: 230000, l: 40, r: 'FS', o: false, d: 'Aki az elöljáró vagy az alárendelt tekintélyét más előtt feltűnően durván megsérti.' },
+            { p: '118', n: 'Korrupció', r: '', fej: true },
+            { p: '118.1', n: 'Magában', b: 300000, l: 40, r: 'KRPM', o: false },
+            { p: '118.2', n: 'Feljelentésének elmulasztása', b: 300000, l: 40, r: 'KRPFE', o: false },
+            { p: '118.3', n: 'Jelentési kötelezettség megszegése', b: 300000, l: 40, r: 'JKMSZ', o: true, d: 'Aki fontos szolgálati ügyben valótlan jelentést tesz.' },
+            { p: '119', n: 'Hivatali visszaélés', b: 450000, l: 40, r: 'HIVV', o: false, d: 'Az a hivatalos személy, aki azért, hogy jogtalan hátrányt okozzon vagy jogtalan előnyt szerezzen, hivatali kötelességét megszegi, túllépi, vagy helyzetével egyébként visszaél.' },
+            { p: '120', n: 'Kötelezettségmulasztás', b: 500000, l: 60, r: 'KML', o: false, d: 'Az az állami alkalmazott, aki kötelezettségének nem tesz eleget.' },
+            { p: '121', n: 'Hazaárulás', b: 5000000, l: 60, r: 'HS', o: false, d: 'A hazaárulás olyan súlyos bűncselekmény, amikor valaki a saját országa ellen cselekszik.' },
+
+            { s: 'Határral kapcsolatos bűncselekmények' },
+            { p: '122', n: 'Határzár tiltott átlépése', r: 'HZTÁ', fej: true },
+            { p: '122.1', n: 'Egyedül', b: 120000, l: 25, r: 'HZTÁE', o: true },
+            { p: '122.2', n: 'Fegyveresen', b: 180000, l: 40, r: 'HZTÁF', o: false },
+            { p: '122.3', n: 'Tömegzavargás résztvevőjeként', b: 200000, l: 40, r: 'HZTÁTR', o: false, d: '3 főtől, csoportosan elkövetve.' },
+            { p: '123', n: 'Határzár megrongálása', r: 'HZM', fej: true, d: 'Aki az államhatár rendjének védelmét biztosító létesítményt, illetve eszközt megsemmisíti vagy megrongálja.' },
+            { p: '123.1', n: 'Egyedül', b: 120000, l: 15, r: 'HZME', o: true },
+            { p: '123.2', n: 'Fegyveresen', b: 180000, l: 25, r: 'HZMF', o: false },
+            { p: '123.3', n: 'Tömegzavargás résztvevőjeként', b: 200000, l: 25, r: 'HZMTR', o: true, d: '3 főtől, csoportosan elkövetve.' },
+            { p: '124', n: 'Embercsempészés', b: 70000, l: 20, r: 'ECS', o: true },
+            { p: '125', n: 'Kábítószercsempészés', b: 90000, l: 40, r: 'KCS', o: true },
+            { p: '126', n: 'Fegyvercsempészés', b: 90000, l: 40, r: 'FCS', o: false },
+            { p: '127', n: 'Jövedéki tárgyak csempészése', b: 65000, l: 15, r: 'JTCS', o: true, d: 'Energiatermékek: üzemanyagok, fűtőanyagok stb. Alkoholtermékek: sör, bor, habzóbor, köztes alkoholtermékek, etil-alkohol stb. Dohánygyártmányok: cigaretta, szivar, szivarka, fogyasztási dohány stb.' },
+            { p: '128', n: 'Jogellenes tartózkodás elősegítése', b: 120000, l: 25, r: 'JTE', o: true, d: 'Aki más állam állampolgárának illegális tartózkodásában segítséget nyújt, szállást biztosít.' },
+            { p: '129', n: 'Jogellenes bevándorlás elősegítése, támogatása', b: 90000, l: 20, r: 'JBET', o: true, d: 'Aki közreműködik abban, hogy más személy a hatósági eljárást érdemben befolyásoló körülményre nézve valótlan tartalmú nyilatkozattal vagy a valós tény elhallgatásával Magyarországon menekültügyi vagy más, tartózkodási jogcím megszerzését lehetővé tevő eljárást kezdeményezzen, illetve ilyen eljárásban a hatósági eljárást érdemben befolyásoló körülményre nézve valótlan tartalmú nyilatkozatot tegyen vagy a valós tényt elhallgassa. Ide sorolandó, amennyiben közreműködik abban, hogy más személy Magyarország államhatárán jogellenesen átlépje, a szükséges ellenőrzések alól magát kivonja.' }
+        ];
+        // ── BTK KALKULÁTOR ──
+        const btkNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const btkFt = n => Math.round(n || 0).toLocaleString('hu-HU') + ' Ft';
+        const btkPerc = percSzoveg;
+        const btkMin = v => Array.isArray(v) ? v[0] : (v || 0);
+        const btkMax = v => Array.isArray(v) ? v[1] : (v || 0);
+        const btkSav = (v, f) => (v == null || v === 0) ? '-' : (Array.isArray(v) && v[0] !== v[1] ? f(v[0]) + ' – ' + f(v[1]) : f(btkMin(v)));
+        const btkOvadek = t => !t.valaszthato ? '' : (t.o === true ? '<span class="ov-igen">✓ Igen</span>' : t.o === false ? '<span class="ov-nem">✗ Nem</span>' : '-');
+        const BTK_TETELEK = [];
+        const BTK_MAP = {};
+        (function () {
+            let fej = null;
+            BTK.forEach(t => {
+                if (t.s) { fej = null; return; }
+                if (!t.p.includes('.')) fej = t;
+                t.szulo = t.p.includes('.') ? fej : null;
+                t.teljesNev = t.szulo ? t.szulo.n + ' – ' + t.n : t.n;
+                t.valaszthato = !t.fej;
+                t.id = 't' + BTK_TETELEK.length;
+                t._kereso = btkNorm([t.p, '§' + t.p, t.teljesNev, t.r, t.d].join(' '));
+                BTK_MAP[t.id] = t;
+                BTK_TETELEK.push(t);
+            });
+            // csoportcímnél a saját + alpontjai szövege, alpontnál a saját + szülője – szűréshez
+            BTK_TETELEK.forEach(t => { t._szuro = t._kereso + ' ' + (t.szulo ? t.szulo._kereso : BTK_TETELEK.filter(x => x.szulo === t).map(x => x._kereso).join(' ')); });
+        })();
+        const btkValasztott = [];
+        const btkKereso = document.getElementById('btkKereso');
+        const btkJavaslat = document.getElementById('btkJavaslat');
+        const btkTbody = document.getElementById('btkTbody');
+        let btkJavLista = [], btkFokusz = -1, btkAutoTimer = null;
+
+        // Táblázat felépítése – csak egyszer, és csak amikor szükség van rá
+        let btkSorok = [];
+        function btkTablaEpit() {
+            if (btkSorok.length) return;
+            btkTbody.innerHTML = BTK.map(t => {
+            if (t.s) return '<tr class="szakasz" data-szakasz="1"><td colspan="7">' + htmlEsc(t.s) + '</td></tr>';
+            const cls = (t.valaszthato ? 'sor' : 'fejsor') + (t.szulo ? ' al' : '');
+            return '<tr class="' + cls + '" data-p="' + t.id + '">'
+                + '<td>' + htmlEsc(t.p) + ' §</td><td>' + htmlEsc(t.n) + '</td><td>' + btkOvadek(t) + '</td>'
+                + '<td>' + (t.valaszthato ? btkSav(t.b, btkFt) : '') + '</td>'
+                + '<td>' + (t.valaszthato ? btkSav(t.l, btkPerc) : '') + '</td>'
+                + '<td>' + (t.d ? htmlEsc(t.d) : '-') + '</td><td>' + htmlEsc(t.r || '') + '</td></tr>';
+        }).join('');
+            btkSorok = Array.from(btkTbody.querySelectorAll('tr'));
+            btkFrissit();
+        }
+
+        function btkFrissit() {
+            let bMin = 0, bMax = 0, lMin = 0, lMax = 0;
+            btkValasztott.forEach(t => { bMin += btkMin(t.b); bMax += btkMax(t.b); lMin += btkMin(t.l); lMax += btkMax(t.l); });
+            document.getElementById('bMinBirsag').textContent = btkFt(bMin);
+            document.getElementById('bMaxBirsag').textContent = btkFt(bMax);
+            document.getElementById('bMinBorton').textContent = btkPerc(lMin);
+            document.getElementById('bMaxBorton').textContent = btkPerc(lMax);
+            document.getElementById('bRovid').textContent = btkValasztott.length ? btkValasztott.map(t => t.r).join(', ') : '–';
+            const ki = document.getElementById('btkKivalasztott');
+            ki.innerHTML = btkValasztott.length
+                ? btkValasztott.map(t => '<div class="btk-ki-elem"><span class="n">' + htmlEsc(t.teljesNev) + ' <small>(' + htmlEsc(t.r) + ')</small></span><span class="b">' + btkFt(btkMin(t.b)) + (btkMin(t.l) ? ' · ' + btkPerc(btkMin(t.l)) : '') + (t.o === false ? ' · <span class="ov-nem">nincs óvadék</span>' : '') + '</span><button type="button" data-btk-torol="' + t.id + '" title="Eltávolítás">✕</button></div>').join('')
+                : '<div class="btk-ki-ures">Még nincs kiválasztott tétel.<br>Keress rá egy szabálysértésre, vagy kattints a táblázat egy sorára.</div>';
+            const sel = new Set(btkValasztott.map(t => t.id));
+            btkSorok.forEach(tr => { if (tr.dataset.p) tr.classList.toggle('valasztva', sel.has(tr.dataset.p)); });
+            return { bMin, bMax, lMin, lMax };
+        }
+        function btkHozzaad(t) {
+            if (!t || !t.valaszthato) return;
+            if (!btkValasztott.includes(t)) btkValasztott.push(t);
+            btkFrissit();
+        }
+        function btkKapcsol(t) {
+            if (!t || !t.valaszthato) return;
+            const i = btkValasztott.indexOf(t);
+            if (i >= 0) btkValasztott.splice(i, 1); else btkValasztott.push(t);
+            btkFrissit();
+        }
+        function btkSzures(q) {
+            const nq = btkNorm(q.trim());
+            let lathato = 0, szakaszTr = null, szakaszVan = false;
+            btkSorok.forEach(tr => {
+                if (tr.dataset.szakasz) {
+                    if (szakaszTr) szakaszTr.style.display = szakaszVan ? '' : 'none';
+                    szakaszTr = tr; szakaszVan = false; return;
+                }
+                const t = BTK_MAP[tr.dataset.p];
+                const ok = !nq || t._szuro.includes(nq);
+                tr.style.display = ok ? '' : 'none';
+                if (ok) { lathato++; szakaszVan = true; }
+            });
+            if (szakaszTr) szakaszTr.style.display = szakaszVan ? '' : 'none';
+            document.getElementById('btkNincs').style.display = lathato ? 'none' : 'block';
+        }
+        function btkJavaslatRajzol(q) {
+            const nq = btkNorm(q.trim());
+            btkFokusz = -1;
+            if (!nq) { btkJavLista = []; btkJavaslat.classList.remove('nyitva'); return; }
+            btkJavLista = BTK_TETELEK.filter(t => t.valaszthato && (t._kereso.includes(nq) || (t.szulo && t.szulo._kereso.includes(nq))))
+                .sort((a, b) => {
+                    const pa = btkNorm(a.r) === nq || btkNorm(a.teljesNev).startsWith(nq) ? 0 : 1;
+                    const pb = btkNorm(b.r) === nq || btkNorm(b.teljesNev).startsWith(nq) ? 0 : 1;
+                    return pa - pb;
+                }).slice(0, 10);
+            if (!btkJavLista.length) { btkJavaslat.innerHTML = '<div class="btk-jav-elem" style="cursor:default">Nincs találat.</div>'; btkJavaslat.classList.add('nyitva'); return; }
+            btkJavaslat.innerHTML = btkJavLista.map((t, i) => '<div class="btk-jav-elem' + (btkValasztott.includes(t) ? ' valasztva' : '') + '" data-i="' + i + '"><span class="p">' + htmlEsc(t.p) + ' §</span><span class="n">' + htmlEsc(t.teljesNev) + ' <small>(' + htmlEsc(t.r) + ')</small></span><span class="b">' + btkSav(t.b, btkFt) + (btkMin(t.l) ? ' · ' + btkSav(t.l, btkPerc) : '') + '</span></div>').join('');
+            btkJavaslat.classList.add('nyitva');
+        }
+        function btkKeresesTorol() {
+            btkKereso.value = '';
+            btkJavaslatRajzol('');
+            btkSzures('');
+        }
+        btkKereso.addEventListener('input', function () {
+            btkTablaEpit();
+            const q = btkKereso.value;
+            btkJavaslatRajzol(q);
+            btkSzures(q);
+            // Automatikus hozzáadás: ha a beírt szöveg pontosan egy tétel nevével egyezik
+            clearTimeout(btkAutoTimer);
+            const nq = btkNorm(q.trim());
+            if (nq.length < 4) return;
+            const tisztit = x => btkNorm(x).replace(/[^a-z0-9]+/g, ' ').trim();
+            const tq = tisztit(q);
+            const pontos = BTK_TETELEK.filter(t => t.valaszthato && (tisztit(t.n) === tq || tisztit(t.teljesNev) === tq));
+            if (pontos.length === 1) {
+                btkAutoTimer = setTimeout(function () { btkHozzaad(pontos[0]); btkKeresesTorol(); }, 500);
+            }
+        });
+        btkKereso.addEventListener('keydown', function (e) {
+            const elemek = btkJavaslat.querySelectorAll('.btk-jav-elem[data-i]');
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                if (!elemek.length) return;
+                e.preventDefault();
+                btkFokusz = (btkFokusz + (e.key === 'ArrowDown' ? 1 : -1) + elemek.length) % elemek.length;
+                elemek.forEach((el, i) => el.classList.toggle('fokusz', i === btkFokusz));
+                elemek[btkFokusz].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const t = btkJavLista[btkFokusz >= 0 ? btkFokusz : 0];
+                if (t) { clearTimeout(btkAutoTimer); btkHozzaad(t); btkKeresesTorol(); }
+            } else if (e.key === 'Escape') {
+                btkJavaslat.classList.remove('nyitva');
+            }
+        });
+        btkKereso.addEventListener('focus', function () { if (btkKereso.value.trim()) btkJavaslatRajzol(btkKereso.value); });
+        btkJavaslat.addEventListener('mousedown', function (e) {
+            const el = e.target.closest('.btk-jav-elem[data-i]'); if (!el) return;
+            e.preventDefault();
+            clearTimeout(btkAutoTimer);
+            btkHozzaad(btkJavLista[Number(el.dataset.i)]);
+            btkKeresesTorol();
+            btkKereso.focus();
+        });
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.btk-kereso-wrap')) btkJavaslat.classList.remove('nyitva');
+        });
+        btkTbody.addEventListener('click', function (e) {
+            const tr = e.target.closest('tr.sor'); if (!tr) return;
+            btkKapcsol(BTK_MAP[tr.dataset.p]);
+        });
+        document.getElementById('btkKivalasztott').addEventListener('click', function (e) {
+            const b = e.target.closest('[data-btk-torol]'); if (!b) return;
+            const i = btkValasztott.indexOf(BTK_MAP[b.dataset.btkTorol]);
+            if (i >= 0) { btkValasztott.splice(i, 1); btkFrissit(); }
+        });
+        document.getElementById('btkNullaz').addEventListener('click', function () {
+            btkValasztott.length = 0;
+            btkKeresesTorol();
+            btkFrissit();
+        });
+        document.getElementById('btkMasol').addEventListener('click', function () {
+            const szoveg = btkValasztott.map(t => t.r).join(', ');
+            if (!szoveg) return;
+            const gomb = this;
+            const kesz = () => { gomb.style.borderColor = 'var(--tek-yellow)'; setTimeout(() => gomb.style.borderColor = '', 800); };
+            if (navigator.clipboard) navigator.clipboard.writeText(szoveg).then(kesz).catch(() => {});
+        });
+        btkFrissit();
+        (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(btkTablaEpit);
+
+        // ── JELENTÉS (JEGYZŐKÖNYV) LEADÁSA ──
+        (function () {
+            const mezok = { nev: 'jkNev', rendfokozat: 'jkRang', azonosito: 'jkAzon', beosztas: 'jkBeosztas', szolgalatiHely: 'jkHely', datum: 'jkDatum', jegyzokonyv: 'jkSzoveg' };
+            const cimkek = { nev: 'Név', rendfokozat: 'Rendfokozat', azonosito: 'Azonosítószám', beosztas: 'Beosztás', szolgalatiHely: 'Szolgálati hely', datum: 'Dátum', jegyzokonyv: 'Jegyzőkönyv' };
+            const el = id => document.getElementById(id);
+            function alapertek() {
+                const ma = new Date();
+                el('jkDatum').value = ma.getFullYear() + '-' + String(ma.getMonth() + 1).padStart(2, '0') + '-' + String(ma.getDate()).padStart(2, '0');
+                if (!el('jkNev').value) el('jkNev').value = sessionStorage.getItem('user_nev') || '';
+                if (!el('jkRang').value) el('jkRang').value = sessionStorage.getItem('user_rang') || '';
+            }
+            alapertek();
+            const gomb = el('jkKuld'), msg = el('jkMsg');
+            gomb.addEventListener('click', async function () {
+                const adat = {};
+                for (const k in mezok) {
+                    adat[k] = el(mezok[k]).value.trim();
+                    if (!adat[k]) { uzenet(msg, 'Töltsd ki ezt a mezőt: ' + cimkek[k] + '.', false); el(mezok[k]).focus(); return; }
+                }
+                adat.datum = adat.datum.replace(/-/g, '.') + '.';   // 2026-11-21 → 2026.11.21.
+                gomb.disabled = true; gomb.textContent = 'Küldés…';
+                try {
+                    const v = await apiHivas(Object.assign({ action: 'jegyzokonyvLeadas', felhasznalonev: felhasznalonev }, adat));
+                    if (v.ok) {
+                        uzenet(msg, 'Jelentés sikeresen leadva!', true);
+                        el('jkSzoveg').value = '';
+                        alapertek();
+                    } else uzenet(msg, v.error || 'Hiba a beküldés során.', false);
+                } catch (err) { uzenet(msg, 'Nem sikerült kapcsolódni a szerverhez.', false); }
+                gomb.disabled = false; gomb.textContent = 'Jelentés leadása';
+            });
+        })();
+        function tipusCimke(t) {
+            return ({ jelszo: 'Új jelszó', felhasznalonev: 'Felhasználónév módosítás', jatekbeli_nev: 'Játékbeli név módosítás', jarmu: 'Új jármű', jelveny: 'Új jelvény', admin: 'Admin jog' })[t] || t;
+        }
+        function statuszBadge(s) {
+            if (s === 'elfogadva') return '<span class="badge zold">Elfogadva</span>';
+            if (s === 'elutasitva') return '<span class="badge piros">Elutasítva</span>';
+            return '<span class="badge sarga">Függőben</span>';
+        }
+        function htmlEsc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+        (function () {
+            const subtabs = document.getElementById('modSubtabs');
+            subtabs.addEventListener('click', function (e) {
+                const b = e.target.closest('.subtab'); if (!b) return;
+                subtabs.querySelectorAll('.subtab').forEach(function (x) { x.classList.remove('active'); });
+                b.classList.add('active');
+                ['modAdat', 'modIgeny', 'modElozmeny'].forEach(function (s) {
+                    document.getElementById('sub-' + s).style.display = (s === b.dataset.sub) ? 'block' : 'none';
+                });
+                if (b.dataset.sub === 'modElozmeny') sajatKerelmekBetolt();
+            });
+            const adatTipus = document.getElementById('adatTipus');
+            const adatErtekLabel = document.getElementById('adatErtekLabel');
+            const adatErtek = document.getElementById('adatErtek');
+            adatTipus.addEventListener('change', function () {
+                const c = { jelszo: 'Új jelszó', felhasznalonev: 'Új felhasználónév', jatekbeli_nev: 'InGame név' }[adatTipus.value];
+                adatErtekLabel.textContent = c; adatErtek.placeholder = c; adatErtek.value = '';
+            });
+            const igenyTipus = document.getElementById('igenyTipus');
+            const igenyErtekFld = document.getElementById('igenyErtekFld');
+            const igenyErtekLabel = document.getElementById('igenyErtekLabel');
+            const igenyErtek = document.getElementById('igenyErtek');
+            igenyTipus.addEventListener('change', function () {
+                if (igenyTipus.value === 'admin') { igenyErtekFld.style.display = 'none'; }
+                else {
+                    igenyErtekFld.style.display = 'block';
+                    igenyErtekLabel.textContent = (igenyTipus.value === 'jarmu') ? 'Melyik járművet igényled?' : 'Melyik jelvényt igényled?';
+                }
+            });
+            async function kuld(tipus, ertek, gomb, msg, alapFelirat) {
+                gomb.disabled = true; gomb.textContent = 'Küldés…';
+                try {
+                    const adat = await apiHivas({ action: 'modositasKuld', felhasznalonev: felhasznalonev, tipus: tipus, ertek: ertek });
+                    if (adat.ok) uzenet(msg, 'Kérelem elküldve! A vezetőség fogja elbírálni.', true);
+                    else uzenet(msg, adat.error || 'Hiba a beküldés során.', false);
+                } catch (err) { uzenet(msg, 'Nem sikerült kapcsolódni a szerverhez.', false); }
+                gomb.disabled = false; gomb.textContent = alapFelirat;
+            }
+            const adatKuld = document.getElementById('adatKuld');
+            const adatMsg = document.getElementById('adatMsg');
+            adatKuld.addEventListener('click', function () {
+                const ertek = adatErtek.value.trim();
+                if (!ertek) { uzenet(adatMsg, 'Add meg az új értéket.', false); return; }
+                kuld(adatTipus.value, ertek, adatKuld, adatMsg, 'Kérelem beküldése');
+                adatErtek.value = '';
+            });
+            const igenyKuld = document.getElementById('igenyKuld');
+            const igenyMsg = document.getElementById('igenyMsg');
+            igenyKuld.addEventListener('click', function () {
+                const tipus = igenyTipus.value;
+                const ertek = (tipus === 'admin') ? '' : igenyErtek.value.trim();
+                if (tipus !== 'admin' && !ertek) { uzenet(igenyMsg, 'Add meg a részleteket.', false); return; }
+                kuld(tipus, ertek, igenyKuld, igenyMsg, 'Igénylés beküldése');
+                igenyErtek.value = '';
+            });
+            async function sajatKerelmekBetolt() {
+                const tart = document.getElementById('sajatKerelmekTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    await apiOlvas({ action: 'sajatModositasok', felhasznalonev: felhasznalonev }, function (adat) {
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + htmlEsc(adat.error || 'Hiba') + '</div>'; return; }
+                    const lista = adat.kerelmek || [];
+                    if (lista.length === 0) { tart.innerHTML = '<div class="admin-ures">Még nincs kérelmed.</div>'; return; }
+                    tart.innerHTML = lista.map(function (k) {
+                        return '<div class="admin-card"><div class="fej"><span class="nev">' + htmlEsc(tipusCimke(k.tipus)) + '</span><span class="spacer"></span>' + statuszBadge(k.statusz) + '</div>'
+                            + (k.ertek ? '<div class="kerelem-ertek">Kért jelszó: <b>' + htmlEsc(k.ertek) + '</b></div>' : '')
+                            + '<div class="kerelem-meta">Beküldve: ' + htmlEsc(k.letrehozva)
+                            + (k.statusz !== 'fuggoben' ? ' · Elbírálta: ' + htmlEsc(k.kezelte || '–') + ' (' + htmlEsc(k.elbiralva) + ')' + (k.indok ? ' · Indok: ' + htmlEsc(k.indok) : '') : '')
+                            + '</div></div>';
+                    }).join('');
+                }); } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+        })();
+        (function () {
+            if (sessionStorage.getItem('user_admin') !== '1') return;
+            const esc = htmlEsc;
+            const percStr = percSzoveg;
+            function penzStr(n) { return (Number(n) || 0).toLocaleString('hu-HU') + ' Ft'; }
+            window.adminNezetBetolt = function (nezet) {
+                if (nezet === 'adminJelentesek') loadJelentesek();
+                else if (nezet === 'adminSzolgalat') loadSzolgalat();
+                else if (nezet === 'adminDolgozok') loadDolgozok();
+                else if (nezet === 'adminOsszegzo') loadOsszegzo();
+                else if (nezet === 'adminModositasok') loadModositasok();
+                else if (nezet === 'adminKezikonyv') loadAdminKezikonyv();
+            };
+            const kkFormCim = document.getElementById('kkFormCim');
+            const kkFormTartalom = document.getElementById('kkFormTartalom');
+            const kkFormId = document.getElementById('kkFormId');
+            const kkMent = document.getElementById('kkMent');
+            const kkMegse = document.getElementById('kkMegse');
+            const kkFormMsg = document.getElementById('kkFormMsg');
+            const kkSzerkCim = document.getElementById('kkSzerkCim');
+            function kkUrlapReset() {
+                kkFormId.value = ''; kkFormCim.value = ''; kkFormTartalom.value = '';
+                kkSzerkCim.textContent = 'Új kézikönyv téma';
+                kkMent.textContent = 'Létrehozás';
+                kkMegse.style.display = 'none';
+                kkFormMsg.className = 'form-msg';
+            }
+            async function loadAdminKezikonyv() {
+                const tart = document.getElementById('adminKezikonyvLista');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    await apiOlvas({ action: 'kezikonyvLista', felhasznalonev: felhasznalonev }, function (adat) {
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    const kk = adat.kezikonyvek || [];
+                    loadAdminKezikonyv._adatok = {};
+                    kk.forEach(function (k) { loadAdminKezikonyv._adatok[k.id] = k; });
+                    if (kk.length === 0) { tart.innerHTML = '<div class="admin-ures">Még nincs kézikönyv téma.</div>'; return; }
+                    tart.innerHTML = kk.map(function (k) {
+                        return '<div class="admin-card"><div class="fej"><span class="nev">' + esc(k.cim) + '</span><span class="spacer"></span>'
+                            + '<button class="btn-mini" data-kk-szerk="' + esc(k.id) + '">Szerkesztés</button>'
+                            + '<button class="btn-mini piros" data-kk-torol="' + esc(k.id) + '">Törlés</button></div>'
+                            + '<div class="kerelem-meta">' + (k.modositva ? 'Frissítve: ' + esc(k.modositva) : 'Létrehozva: ' + esc(k.letrehozva)) + '</div></div>';
+                    }).join('');
+                }); } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            kkMent.addEventListener('click', async function () {
+                const cim = kkFormCim.value.trim();
+                if (!cim) { uzenet(kkFormMsg, 'Adj meg egy címet.', false); return; }
+                const szerkeszt = kkFormId.value !== '';
+                kkMent.disabled = true; kkMent.textContent = 'Mentés…';
+                try {
+                    const adat = await apiHivas({
+                        action: szerkeszt ? 'kezikonyvModosit' : 'kezikonyvUj',
+                        felhasznalonev: felhasznalonev, id: kkFormId.value, cim: cim, tartalom: kkFormTartalom.value
+                    });
+                    if (adat.ok) { kkUrlapReset(); loadAdminKezikonyv(); uzenet(kkFormMsg, szerkeszt ? 'Módosítva.' : 'Létrehozva.', true); }
+                    else uzenet(kkFormMsg, adat.error || 'Hiba.', false);
+                } catch (err) { uzenet(kkFormMsg, 'Nem sikerült kapcsolódni a szerverhez.', false); }
+                kkMent.disabled = false;
+                kkMent.textContent = kkFormId.value ? 'Módosítás mentése' : 'Létrehozás';
+            });
+            kkMegse.addEventListener('click', function () { kkUrlapReset(); });
+            async function loadModositasok() {
+                const tart = document.getElementById('adminModositasokTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    const adat = await apiHivas({ action: 'adminModositasok', felhasznalonev: felhasznalonev });
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    const lista = adat.kerelmek || [];
+                    if (lista.length === 0) { tart.innerHTML = '<div class="admin-ures">Nincs kérelem.</div>'; return; }
+                    tart.innerHTML = lista.map(function (k) {
+                        const fuggo = k.statusz === 'fuggoben';
+                        return '<div class="admin-card"><div class="fej"><span class="nev">' + esc(k.nev || k.felhasznalonev) + '</span><span class="fn">@' + esc(k.felhasznalonev) + '</span><span class="spacer"></span><span class="badge">' + esc(tipusCimke(k.tipus)) + '</span>' + statuszBadge(k.statusz) + '</div>'
+                            + (k.ertek ? '<div class="kerelem-ertek">Kért jelszó: <b>' + esc(k.ertek) + '</b></div>' : '')
+                            + '<div class="kerelem-meta">Beküldve: ' + esc(k.letrehozva)
+                            + (!fuggo ? ' · Elbírálta: ' + esc(k.kezelte || '–') + ' (' + esc(k.elbiralva) + ')' + (k.indok ? ' · Indok: ' + esc(k.indok) : '') : '')
+                            + '</div>'
+                            + (fuggo ? '<div class="kerelem-dontes"><input type="text" class="d-indok" placeholder="Indok (opcionális)"><button class="btn-mini kek" data-elfogad="' + esc(k.id) + '">Elfogadás</button><button class="btn-mini piros" data-elutasit="' + esc(k.id) + '">Elutasítás</button></div>' : '')
+                            + '</div>';
+                    }).join('');
+                } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            async function loadJelentesek() {
+                const tart = document.getElementById('adminJelentesekTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    await apiOlvas({ action: 'adminJegyzokonyvek', felhasznalonev: felhasznalonev }, function (adat) {
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    const lista = adat.jegyzokonyvek || [];
+                    if (lista.length === 0) { tart.innerHTML = '<div class="admin-ures">Még nincs leadott jelentés.</div>'; return; }
+                    tart.innerHTML = lista.map(function (j) {
+                        return '<div class="admin-card"><div class="fej"><span class="nev">' + esc(j.nev) + '</span>'
+                            + (j.felhasznalonev ? '<span class="fn">@' + esc(j.felhasznalonev) + '</span>' : '')
+                            + '<span class="spacer"></span><span class="badge">' + esc(j.rendfokozat) + '</span><span class="badge szurke">' + esc(j.datum) + '</span>'
+                            + '<button class="btn-mini piros" data-torol-jk="' + esc(j.sor) + '">Törlés</button></div>'
+                            + '<div class="jk-adatok"><span>Azonosítószám: <b>' + esc(j.azonosito) + '</b></span><span>Beosztás: <b>' + esc(j.beosztas) + '</b></span><span>Szolgálati hely: <b>' + esc(j.szolgalatiHely) + '</b></span><span>Beküldve: <b>' + esc(j.bekuldve) + '</b></span></div>'
+                            + '<div class="jk-szoveg">' + esc(j.jegyzokonyv) + '</div></div>';
+                    }).join('');
+                }); } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            async function loadSzolgalat() {
+                const tart = document.getElementById('adminSzolgalatTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    await apiOlvas({ action: 'adminSzolgalatok', felhasznalonev: felhasznalonev }, function (adat) {
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    const cs = {};
+                    (adat.szolgalatok || []).forEach(function (s) { const k = s.felhasznalonev; (cs[k] = cs[k] || { nev: s.nev, fn: k, elemek: [] }).elemek.push(s); });
+                    const kulcsok = Object.keys(cs);
+                    if (kulcsok.length === 0) { tart.innerHTML = '<div class="admin-ures">Még nincs leadott szolgálat.</div>'; return; }
+                    let html = '';
+                    kulcsok.forEach(function (k) {
+                        const g = cs[k];
+                        const op = g.elemek.reduce(function (s, e) { return s + (e.perc || 0); }, 0);
+                        html += '<div class="admin-card"><div class="fej"><span class="nev">' + esc(g.nev || g.fn) + '</span><span class="fn">@' + esc(g.fn) + '</span><span class="spacer"></span><span class="badge">' + g.elemek.length + ' szolgálat</span><span class="badge zold">' + percStr(op) + '</span></div>'
+                            + '<table class="admin-tabla"><thead><tr><th>Szolgálatba lépés</th><th>Leadás</th><th>Idő</th></tr></thead><tbody>';
+                        g.elemek.forEach(function (e) { html += '<tr><td>' + esc(e.kezdes) + '</td><td>' + esc(e.vege) + '</td><td>' + percStr(e.perc) + '</td></tr>'; });
+                        html += '</tbody></table></div>';
+                    });
+                    tart.innerHTML = html;
+                }); } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            const RANGOK = ['Regionális vezető', 'r. Alezredes', 'r. Őrnagy', 'r. Százados', 'r. Főhadnagy', 'r. Hadnagy', 'r. Főtörzszászlós', 'r. Törzszászlós', 'r. Zászlós', 'r. Főtörzsőrmester', 'r. Törzsőrmester', 'r. Őrmester', 'Próbaidős Őrmester',];
+            function rangSelectHTML(cls, aktualis) {
+                aktualis = (aktualis == null) ? '' : String(aktualis);
+                let opts = RANGOK.map(function (r) { return '<option value="' + esc(r) + '"' + (r === aktualis ? ' selected' : '') + '>' + esc(r) + '</option>'; }).join('');
+                if (aktualis && RANGOK.indexOf(aktualis) < 0) {
+                    opts = '<option value="' + esc(aktualis) + '" selected>' + esc(aktualis) + ' (egyedi)</option>' + opts;
+                }
+                return '<select class="' + cls + '">' + opts + '</select>';
+            }
+            async function loadDolgozok() {
+                const tart = document.getElementById('adminDolgozokTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    const adat = await apiHivas({ action: 'adminDolgozok', felhasznalonev: felhasznalonev });
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    const lista = adat.dolgozok || [];
+                    if (lista.length === 0) { tart.innerHTML = '<div class="admin-ures">Nincs dolgozó.</div>'; return; }
+                    let html = '';
+                    lista.forEach(function (d) {
+                        const fn = esc(d.felhasznalonev);
+                        html += '<div class="admin-card" data-fn="' + fn + '">'
+                            + '<div class="fej"><span class="nev">' + esc(d.nev || d.felhasznalonev) + '</span><span class="fn">@' + fn + '</span><span class="spacer"></span>'
+                            + (d.admin ? '<span class="badge">admin</span>' : '')
+                            + (d.aktiv ? '<span class="badge zold">aktív</span>' : '<span class="badge piros">letiltva</span>') + '</div>'
+                            + '<div class="dolgozo-grid">'
+                            + '<div class="fld"><label>Felhasználó név</label><input type="text" class="d-fn" value="' + fn + '"></div>'
+                            + '<div class="fld"><label>Ingame neve</label><input type="text" class="d-nev" value="' + esc(d.nev) + '"></div>'
+                            + '<div class="fld"><label>Kompetencia</label>' + rangSelectHTML('d-rang', d.rang) + '</div>'
+                            + '<div class="fld"><label>Új jelszó (üres = marad)</label><input type="text" class="d-jelszo" placeholder="••••••" autocomplete="off"></div>'
+                            + '</div>'
+                            + '<div class="dolgozo-kapcsolok">'
+                            + '<label class="kapcsolo"><input type="checkbox" class="d-admin" ' + (d.admin ? 'checked' : '') + '> Admin jog</label>'
+                            + '<label class="kapcsolo"><input type="checkbox" class="d-aktiv" ' + (d.aktiv ? 'checked' : '') + '> Aktív fiók</label>'
+                            + '</div>'
+                            + '<div class="admin-gombsor"><button class="btn-mini kek" data-ment="' + fn + '">Mentés</button><button class="btn-mini piros" data-torol-dolgozo="' + fn + '">Fiók törlése</button></div>'
+                            + '<div class="form-msg" data-msg></div></div>';
+                    });
+                    tart.innerHTML = html;
+                } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            async function loadOsszegzo() {
+                const tart = document.getElementById('adminOsszegzoTart');
+                tart.innerHTML = '<div class="admin-ures">Betöltés…</div>';
+                try {
+                    await apiOlvas({ action: 'adminOsszegzo', felhasznalonev: felhasznalonev }, function (adat) {
+                    if (!adat.ok) { tart.innerHTML = '<div class="admin-ures">' + esc(adat.error || 'Hiba') + '</div>'; return; }
+                    document.getElementById('oJel').textContent = (adat.osszJelentes || 0).toLocaleString('hu-HU');
+                    document.getElementById('oPerc').textContent = percStr(adat.osszPerc || 0);
+                    document.getElementById('oPenz').textContent = penzStr(adat.osszPenz || 0);
+                    const userek = adat.userek || [];
+                    if (userek.length === 0) { tart.innerHTML = '<div class="admin-ures">Ezen a héten még nincs beküldés.</div>'; return; }
+                    let html = '<div class="admin-card"><div class="fej"><span class="nev">Felhasználói bontás (aktuális hét)</span></div>'
+                        + '<table class="admin-tabla"><thead><tr><th>Név</th><th>Jelentés</th><th>Szolgálati idő</th><th>Összeg</th><th></th></tr></thead><tbody>';
+                    userek.forEach(function (u) {
+                        html += '<tr><td>' + esc(u.nev || u.felhasznalonev) + ' <span class="fn">@' + esc(u.felhasznalonev) + '</span></td><td>' + (u.jelentes || 0) + '</td><td>' + percStr(u.perc) + '</td><td>' + penzStr(u.penz) + '</td><td><button class="btn-mini piros" data-nullaz-user="' + esc(u.felhasznalonev) + '">Nullázás</button></td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                    tart.innerHTML = html;
+                }); } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            const ujKuld = document.getElementById('ujDolgozoKuld');
+            const ujMsg = document.getElementById('ujDolgozoMsg');
+            ujKuld.addEventListener('click', async function () {
+                const fn = document.getElementById('ujFn').value.trim();
+                const jelszo = document.getElementById('ujJelszo').value;
+                const nevErt = document.getElementById('ujNev').value.trim();
+                const rang = document.getElementById('ujRang').value.trim();
+                if (!fn || !jelszo) { uzenet(ujMsg, 'A bejelentkezési név és a jelszó kötelező.', false); return; }
+                ujKuld.disabled = true; ujKuld.textContent = 'Létrehozás…';
+                try {
+                    const adat = await apiHivas({ action: 'adminUjDolgozo', felhasznalonev: felhasznalonev, uj_felhasznalonev: fn, uj_jelszo: jelszo, uj_nev: nevErt, uj_rang: rang });
+                    if (adat.ok) { uzenet(ujMsg, 'Dolgozó létrehozva: ' + fn, true); ['ujFn', 'ujJelszo', 'ujNev'].forEach(function (id) { document.getElementById(id).value = ''; }); }
+                    else uzenet(ujMsg, adat.error || 'Hiba.', false);
+                } catch (err) { uzenet(ujMsg, 'Nem sikerült kapcsolódni a szerverhez.', false); }
+                ujKuld.disabled = false; ujKuld.textContent = 'Dolgozó létrehozása';
+            });
+            document.addEventListener('click', async function (e) {
+                const kkSzerkBtn = e.target.closest('[data-kk-szerk]');
+                if (kkSzerkBtn) {
+                    const k = (loadAdminKezikonyv._adatok || {})[kkSzerkBtn.dataset.kkSzerk]; if (!k) return;
+                    kkFormId.value = k.id; kkFormCim.value = k.cim; kkFormTartalom.value = k.tartalom || '';
+                    kkSzerkCim.textContent = 'Kézikönyv szerkesztése';
+                    kkMent.textContent = 'Módosítás mentése';
+                    kkMegse.style.display = 'inline-block';
+                    kkFormMsg.className = 'form-msg';
+                    document.getElementById('view-adminKezikonyv').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                const kkTorolBtn = e.target.closest('[data-kk-torol]');
+                if (kkTorolBtn) {
+                    if (!confirm('Biztosan törlöd ezt a kézikönyv témát?')) return;
+                    kkTorolBtn.disabled = true;
+                    try {
+                        const adat = await apiHivas({ action: 'kezikonyvTorol', felhasznalonev: felhasznalonev, id: kkTorolBtn.dataset.kkTorol });
+                        if (adat.ok) loadAdminKezikonyv(); else { alert(adat.error || 'Hiba.'); kkTorolBtn.disabled = false; }
+                    } catch (err) { alert('Szerver hiba.'); kkTorolBtn.disabled = false; }
+                    return;
+                }
+                const elfogadBtn = e.target.closest('[data-elfogad]');
+                const elutasitBtn = e.target.closest('[data-elutasit]');
+                if (elfogadBtn || elutasitBtn) {
+                    const btn = elfogadBtn || elutasitBtn;
+                    const id = elfogadBtn ? elfogadBtn.dataset.elfogad : elutasitBtn.dataset.elutasit;
+                    const dontes = elfogadBtn ? 'elfogad' : 'elutasit';
+                    const card = btn.closest('.admin-card');
+                    const indokMezo = card.querySelector('.d-indok');
+                    const indok = indokMezo ? indokMezo.value.trim() : '';
+                    if (dontes === 'elfogad' && !confirm('Elfogadod ezt a kérelmet? A változás azonnal életbe lép.')) return;
+                    btn.disabled = true; btn.textContent = '…';
+                    try {
+                        const adat = await apiHivas({ action: 'modositasDontes', felhasznalonev: felhasznalonev, id: id, dontes: dontes, indok: indok });
+                        if (adat.ok) loadModositasok();
+                        else { alert(adat.error || 'Hiba.'); btn.disabled = false; btn.textContent = elfogadBtn ? 'Elfogadás' : 'Elutasítás'; }
+                    } catch (err) { alert('Szerver hiba.'); btn.disabled = false; btn.textContent = elfogadBtn ? 'Elfogadás' : 'Elutasítás'; }
+                    return;
+                }
+                const mentBtn = e.target.closest('[data-ment]');
+                if (mentBtn) {
+                    const card = mentBtn.closest('.admin-card');
+                    const msg = card.querySelector('[data-msg]');
+                    const payload = {
+                        action: 'adminDolgozoModosit', felhasznalonev: felhasznalonev,
+                        cel_felhasznalonev: mentBtn.dataset.ment,
+                        uj_felhasznalonev: card.querySelector('.d-fn').value.trim(),
+                        uj_nev: card.querySelector('.d-nev').value,
+                        uj_rang: card.querySelector('.d-rang').value,
+                        uj_admin: card.querySelector('.d-admin').checked,
+                        uj_aktiv: card.querySelector('.d-aktiv').checked
+                    };
+                    const jelszoErt = card.querySelector('.d-jelszo').value;
+                    if (jelszoErt) payload.uj_jelszo = jelszoErt;
+                    mentBtn.disabled = true; mentBtn.textContent = 'Mentés…';
+                    try {
+                        const adat = await apiHivas(payload);
+                        if (adat.ok) { loadDolgozok(); }
+                        else { msg.className = 'form-msg show err'; msg.textContent = adat.error || 'Hiba.'; mentBtn.disabled = false; mentBtn.textContent = 'Mentés'; }
+                    } catch (err) { msg.className = 'form-msg show err'; msg.textContent = 'Szerver hiba.'; mentBtn.disabled = false; mentBtn.textContent = 'Mentés'; }
+                    return;
+                }
+                const torolBtn = e.target.closest('[data-torol-dolgozo]');
+                if (torolBtn) {
+                    const fn = torolBtn.dataset.torolDolgozo;
+                    if (!confirm('Biztosan törlöd a(z) "' + fn + '" fiókot? Ez nem visszavonható.')) return;
+                    torolBtn.disabled = true;
+                    const adat = await apiHivas({ action: 'adminDolgozoTorol', felhasznalonev: felhasznalonev, cel_felhasznalonev: fn });
+                    if (adat.ok) loadDolgozok(); else { alert(adat.error || 'Hiba.'); torolBtn.disabled = false; }
+                    return;
+                }
+                const jtorol = e.target.closest('[data-torol-jk]');
+                if (jtorol) {
+                    if (!confirm('Biztosan törlöd ezt a jelentést? Ez nem visszavonható.')) return;
+                    jtorol.disabled = true;
+                    const adat = await apiHivas({ action: 'adminJegyzokonyvTorol', felhasznalonev: felhasznalonev, sor: Number(jtorol.dataset.torolJk) });
+                    if (adat.ok) loadJelentesek(); else { alert(adat.error || 'Hiba.'); jtorol.disabled = false; }
+                    return;
+                }
+                const nullUser = e.target.closest('[data-nullaz-user]');
+                if (nullUser) {
+                    const fn = nullUser.dataset.nullazUser;
+                    if (!confirm('Biztosan nullázod "' + fn + '" ÖSSZES beküldését (jelentések + szolgálatok)? Ez nem visszavonható.')) return;
+                    nullUser.disabled = true;
+                    const adat = await apiHivas({ action: 'adminNullaz', felhasznalonev: felhasznalonev, mod: 'user', cel_felhasznalonev: fn });
+                    if (adat.ok) loadOsszegzo(); else { alert(adat.error || 'Hiba.'); nullUser.disabled = false; }
+                    return;
+                }
+            });
+            document.getElementById('nullazMind').addEventListener('click', async function () {
+                if (!confirm('Biztosan törlöd MINDENKI összes jelentését és szolgálatát? Ez nem visszavonható!')) return;
+                this.disabled = true; this.textContent = 'Nullázás…';
+                const adat = await apiHivas({ action: 'adminNullaz', felhasznalonev: felhasznalonev, mod: 'globalis' });
+                this.disabled = false; this.textContent = 'Összes beküldés nullázása';
+                if (adat.ok) loadOsszegzo(); else alert(adat.error || 'Hiba.');
+            });
+        })();
+        // ── ÁTTEKINTÉS: statisztika + grafikonok ──
+        (function () {
+            const napok = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'];
+            const NULLA = [0, 0, 0, 0, 0, 0, 0];
+            let utolso = null, chart1 = null, chart2 = null;
+            function megjelenit() {
+                if (!utolso || !utolso.ok) return;
+                document.getElementById('sumJelentes').textContent = (utolso.osszJelentes || 0).toLocaleString('hu-HU');
+                document.getElementById('sumPerc').textContent = percSzoveg(utolso.osszPerc || 0);
+                document.getElementById('sumPenz').textContent = (utolso.osszPenz || 0).toLocaleString('hu-HU') + ' Ft';
+                if (chart1) { chart1.data.datasets[0].data = utolso.hetiJelentesek || NULLA.slice(); chart1.update(); }
+                if (chart2) { chart2.data.datasets[0].data = utolso.hetiSzolgPerc || NULLA.slice(); chart2.update(); }
+            }
+            // a kérés azonnal indul, nem várja meg a grafikon-könyvtárat
+            apiOlvas({ action: 'getStats', felhasznalonev: felhasznalonev }, function (adat) { utolso = adat; megjelenit(); }).catch(function () {});
+
+            function grafikonok() {
+                if (typeof Chart === 'undefined') return;
+                const SARGA = '#f5c400', SARGA_HALVANY = 'rgba(245, 196, 0, 0.15)', RACS = 'rgba(255, 255, 255, 0.08)';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+                Chart.defaults.color = '#aab2bf';
+                const opciok = egyseg => ({
+                    responsive: true, maintainAspectRatio: false, animation: { duration: 400 },
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(14,16,22,0.92)', padding: 10, cornerRadius: 8, displayColors: false, callbacks: { label: c => c.parsed.y + ' ' + egyseg } } },
+                    scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { beginAtZero: true, border: { display: false }, grid: { color: RACS }, ticks: { precision: 0, font: { size: 11 } } } }
+                });
+                chart1 = new Chart(document.getElementById('chartSajat'), { type: 'bar',
+                    data: { labels: napok, datasets: [{ label: 'Jelentés', data: NULLA.slice(), backgroundColor: SARGA, hoverBackgroundColor: '#ffd21f', borderRadius: 6, maxBarThickness: 34 }] },
+                    options: opciok('jelentés') });
+                chart2 = new Chart(document.getElementById('chartSzolg'), { type: 'line',
+                    data: { labels: napok, datasets: [{ label: 'Perc', data: NULLA.slice(), borderColor: SARGA, backgroundColor: SARGA_HALVANY, fill: true, tension: 0.35, borderWidth: 2, pointBackgroundColor: SARGA, pointRadius: 3, pointHoverRadius: 5 }] },
+                    options: opciok('perc') });
+                megjelenit();
+            }
+            // a "defer" szkriptek a DOMContentLoaded előtt futnak le
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', grafikonok); else grafikonok();
+        })();
+    </script></body></html>

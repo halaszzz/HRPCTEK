@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terrorelhárítás Budapesti Igazgatósága – Bejelentkezés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* TEK logó sárga – ha a logód árnyalata eltér, csak ezt az egy sort írd át */
+  --tek-yellow:#f5c400;
+  --tek-yellow-hover:#ffd21f;
+  --tek-yellow-glow:rgba(245,196,0,0.25);
+
+  --card-bg:rgba(18,20,28,0.35);           /* átlátszó panel */
+  --card-border:rgba(255,255,255,0.14);
+  --input-bg:rgba(255,255,255,0.08);       /* átlátszó mezők */
+  --input-border:rgba(255,255,255,0.18);
+  --text:#ffffff;
+  --text-muted:#c3c9d3;
+  --text-label:#e2e6ec;
+  --footer:#aab2bf
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden;background-color:#0d0f14}
+
+/* Háttérkép: kepek/tek2.png */
+.bg{position:fixed;inset:-20px;background:url('kepek/tek2.png') center center / cover no-repeat;filter:blur(9px) brightness(0.62);transform:scale(1.06);z-index:0}
+.bg-overlay{position:fixed;inset:0;background:rgba(10,12,18,0.35);z-index:1}
+
+/* Átlátszó (üveghatású) panel */
+.card{position:relative;z-index:2;width:400px;max-width:calc(100vw - 32px);background:var(--card-bg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--card-border);border-radius:16px;padding:40px 40px 34px;box-shadow:0 24px 60px rgba(0,0,0,0.45);text-align:center}
+.logo{width:118px;height:118px;margin:0 auto 22px;display:block;object-fit:contain}
+.card h1{font-size:26px;font-weight:700;letter-spacing:-0.2px;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
+.subtitle{font-size:14px;font-weight:400;color:var(--text-muted);margin-bottom:28px}
+.subtitle b{color:var(--tek-yellow);font-weight:600}
+
+.field{text-align:left;margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--text-label);margin-bottom:8px}
+.field input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:9px;padding:13px 15px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.field input::placeholder{color:#a3aab6}
+
+/* Sárga körvonal kurzor alatt és fókuszban */
+.field input:hover{border-color:var(--tek-yellow)}
+.field input:focus{border-color:var(--tek-yellow);box-shadow:0 0 0 3px var(--tek-yellow-glow)}
+
+/* Sárga gombok */
+.btn-primary{width:100%;background:var(--tek-yellow);color:#111;border:none;border-radius:9px;padding:13px 15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;outline:2px solid transparent;outline-offset:2px;transition:background .15s ease,outline-color .15s ease}
+.btn-primary:hover{background:var(--tek-yellow-hover);outline-color:var(--tek-yellow)}
+.btn-primary:focus-visible{outline-color:var(--tek-yellow)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:0.7;cursor:default;outline-color:transparent}
+
+.error{display:none;background:rgba(244,47,78,0.15);border:1px solid rgba(244,47,78,0.45);color:#ffb3bf;font-size:13px;border-radius:8px;padding:10px 12px;margin-bottom:18px;text-align:left}
+.error.show{display:block}
+
+/* "Másik fiók" link – sárga körvonal kurzor alatt */
+.back-link{display:inline-block;margin-top:14px;padding:4px 10px;font-size:13px;color:var(--text-muted);text-decoration:none;border:1px solid transparent;border-radius:6px;transition:color .15s ease,border-color .15s ease}
+.back-link:hover,.back-link:focus-visible{color:var(--tek-yellow);border-color:var(--tek-yellow);outline:none}
+
+.footer{margin-top:24px;font-size:12px;color:var(--footer)}
+@media (max-width:440px){.card{padding:32px 24px 26px}.card h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="bg-overlay"></div>
+<div class="card">
+  <img class="logo" src="kepek/tek1.png" decoding="async" alt="TEK LOGÓ">
+  <h1>Terrorelhárítás Budapesti Igazgatósága</h1>
+  <p class="subtitle" id="subtitle">Kérjük adja meg a felhasználónevét</p>
+  <div class="error" id="hiba"></div>
+
+  <form id="lepesFelhasznalo" autocomplete="off">
+    <div class="field">
+      <label for="felhasznalonev">Felhasználónév</label>
+      <input type="text" id="felhasznalonev" name="felhasznalonev" placeholder="Felhasználónév" autofocus required>
+    </div>
+    <button type="submit" class="btn-primary" id="gombTovabb">Tovább &rarr;</button>
+  </form>
+
+  <form id="lepesJelszo" autocomplete="off" style="display:none;">
+    <div class="field">
+      <label for="jelszo">Jelszó</label>
+      <input type="password" id="jelszo" name="jelszo" placeholder="Jelszó" required>
+    </div>
+    <button type="submit" class="btn-primary" id="gombBelepes">Belépés &rarr;</button>
+    <a href="#" class="back-link" id="masikFiok">&larr; Másik fiók</a>
+  </form>
+
+  <div class="footer">Terrorelhárítás Budapesti Igazgatósága &middot; Belső Rendszer</div>
+</div>
+
+<script src="config.js"></script>
+<script>
+    const subtitle = document.getElementById('subtitle');
+    const hiba      = document.getElementById('hiba');
+    const formFelh  = document.getElementById('lepesFelhasznalo');
+    const inputFelh = document.getElementById('felhasznalonev');
+    const gombTov   = document.getElementById('gombTovabb');
+    const formJelszo = document.getElementById('lepesJelszo');
+    const inputJelszo= document.getElementById('jelszo');
+    const gombBelep  = document.getElementById('gombBelepes');
+    const masikFiok  = document.getElementById('masikFiok');
+    let aktualisFelhasznalo = '';
+    function hibaKiir(uzenet){ hiba.textContent = uzenet; hiba.classList.add('show'); }
+    function hibaTorol(){ hiba.textContent = ''; hiba.classList.remove('show'); }
+    function tovabbToltes(be){ gombTov.disabled = be; gombTov.textContent = be ? 'Ellenőrzés…' : 'Tovább →'; }
+    function belepToltes(be){ gombBelep.disabled = be; gombBelep.textContent = be ? 'Belépés…' : 'Belépés →'; }
+    inputFelh.addEventListener('input', hibaTorol);
+    inputJelszo.addEventListener('input', hibaTorol);
+    formFelh.addEventListener('submit', async function(e){
+        e.preventDefault();
+        hibaTorol();
+        const felhasznalonev = inputFelh.value.trim();
+        if (felhasznalonev === '') { hibaKiir('Kérjük adja meg a felhasználónevét.'); inputFelh.focus(); return; }
+        tovabbToltes(true);
+        try {
+            const res  = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'checkUser', felhasznalonev: felhasznalonev })
+            });
+            const adat = await res.json();
+            if (adat.ok) {
+                aktualisFelhasznalo = felhasznalonev;
+                subtitle.innerHTML = 'Üdv, <b>' + (adat.nev || felhasznalonev) + '</b>! Kérjük adja meg a jelszavát';
+                formFelh.style.display = 'none';
+                formJelszo.style.display = 'block';
+                inputJelszo.value = '';
+                inputJelszo.focus();
+            } else {
+                hibaKiir(adat.error || 'Nincs ilyen felhasználó.');
+            }
+        } catch (err) {
+            hibaKiir('Nem sikerült kapcsolódni a szerverhez.');
+        }
+        tovabbToltes(false);
+    });
+    formJelszo.addEventListener('submit', async function(e){
+        e.preventDefault();
+        hibaTorol();
+        const jelszo = inputJelszo.value;
+        if (jelszo === '') { hibaKiir('Kérjük adja meg a jelszavát.'); inputJelszo.focus(); return; }
+        belepToltes(true);
+        try {
+            const res  = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', felhasznalonev: aktualisFelhasznalo, jelszo: jelszo })
+            });
+            const adat = await res.json();
+            if (adat.ok) {
+                sessionStorage.setItem('bejelentkezve', '1');
+                sessionStorage.setItem('user_felhasznalonev', adat.felhasznalonev || aktualisFelhasznalo);
+                sessionStorage.setItem('user_nev',  adat.nev  || '');
+                sessionStorage.setItem('user_rang', adat.rang || '');
+                sessionStorage.setItem('user_admin', adat.admin ? '1' : '0');
+                window.location.href = 'tek.html';
+            } else {
+                hibaKiir(adat.error || 'Hibás jelszó.');
+                inputJelszo.value = '';
+                inputJelszo.focus();
+                belepToltes(false);
+            }
+        } catch (err) {
+            hibaKiir('Nem sikerült kapcsolódni a szerverhez.');
+            belepToltes(false);
+        }
+    });
+    masikFiok.addEventListener('click', function(e){
+        e.preventDefault();
+        hibaTorol();
+        aktualisFelhasznalo = '';
+        formJelszo.style.display = 'none';
+        formFelh.style.display = 'block';
+        subtitle.textContent = 'Kérjük adja meg a felhasználónevét';
+        inputJelszo.value = '';
+        inputFelh.focus();
+    });
+</script>
+</body>
+</html>
