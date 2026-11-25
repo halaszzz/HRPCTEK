@@ -153,7 +153,63 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
 @media (max-width:620px){.dolgozo-grid,.admin-total-row{grid-template-columns:1fr}}
 .view{display:none}
 .view.active{display:block}
-@media (max-width:860px){.app{flex-direction:column}.sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border)}.menu{flex-direction:row;overflow-x:auto;padding:10px;gap:6px}.menu-item{white-space:nowrap;width:auto}.sidebar-footer{display:flex;align-items:center;gap:12px}.user-row{flex:1;padding:0}.logout{width:auto;padding:10px 16px}.content-head{padding:22px 18px 0}.content-body{padding:18px}.charts{grid-template-columns:1fr}}
+/* ── TELEFON / KESKENY KÉPERNYŐ ── */
+.mobil-fej,.menu-hatter{display:none}
+@media (max-width:860px){
+  .app{flex-direction:column}
+  /* felső sáv a menügombbal */
+  .mobil-fej{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:40;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:rgba(14,16,22,.92);border-bottom:1px solid var(--border)}
+  .menu-gomb{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .menu-gomb:active,.menu-gomb:hover{border-color:var(--tek-yellow)}
+  .menu-gomb svg{width:22px;height:22px}
+  .mobil-fej img{width:32px;height:32px;object-fit:contain}
+  .mobil-fej .cim{min-width:0;line-height:1.2}
+  .mobil-fej .cim b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobil-fej .cim span{display:block;font-size:12px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* balról becsúszó menü */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:60;width:min(84vw,300px);height:100%;height:100dvh;background:rgba(14,16,22,.98);border-right:1px solid var(--border);transform:translateX(-102%);transition:transform .25s ease;box-shadow:8px 0 30px rgba(0,0,0,.5);padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+  body.menu-nyitva .sidebar{transform:translateX(0)}
+  .menu-hatter{display:block;position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s ease}
+  body.menu-nyitva .menu-hatter{opacity:1;pointer-events:auto}
+  body.menu-nyitva{overflow:hidden}
+  .menu-item{padding:13px 14px;font-size:15px}
+  /* tartalom */
+  .content-head{padding:18px 16px 0}
+  .content-head h1{font-size:22px}
+  .content-head p{font-size:13px}
+  .content-body{padding:16px 14px 32px}
+  .charts{grid-template-columns:1fr}
+  .chart-wrap{height:190px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:14px}
+  .stat .value{font-size:20px}
+  .stat .value.small{font-size:15px;word-break:break-word}
+  .form-card{padding:20px 16px;border-radius:14px}
+  .form-submit{width:100%;padding:14px}
+  /* iOS ne nagyítson rá a mezőkre (16px alatt zoomol) */
+  .fld input,.fld select,.fld textarea,.kerelem-dontes input,.btk-kereso input{font-size:16px}
+  .admin-card{padding:14px;overflow-x:auto}
+  .admin-card .fej .spacer{flex-basis:100%;height:0}
+  table.admin-tabla{min-width:520px}
+  .admin-total-row{grid-template-columns:1fr}
+  .admin-gombsor .btn-mini,.kerelem-dontes .btn-mini{padding:10px 14px}
+  .subtabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .subtab{white-space:nowrap}
+  /* BTK kalkulátor */
+  .btk-kereso{padding:2px 4px 2px 12px}
+  .btk-kereso input{min-width:0}
+  .btk-null{padding:8px;flex-shrink:0}
+  .btk-calc{grid-template-columns:1fr;padding:8px}
+  .btk-stat{padding:10px 12px}
+  .btk-stat b{font-size:16px}
+  .btk-jobb{max-height:220px}
+  .btk-tabla-wrap{max-height:65vh}
+  .btk-tabla{min-width:760px}
+  .btk-jav-elem{flex-wrap:wrap;gap:4px 10px}
+  .btk-jav-elem .n{flex-basis:calc(100% - 60px)}
+  .btk-jav-elem .b{margin-left:54px}
+}
+@media (max-width:380px){.stats{grid-template-columns:1fr}}
 
 /* ── BTK kalkulátor ── */
 .btk{display:flex;flex-direction:column;gap:14px;max-width:1200px;width:100%;margin:0 auto}
@@ -238,7 +294,7 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
 .btk-tabla tr.sor.valasztva td:nth-child(1)::before{content:'✓ ';color:var(--tek-yellow)}
 .btk-tabla tr.al td:nth-child(2){padding-left:26px;color:var(--text-muted)}
 @media (max-width:860px){.btk-calc{grid-template-columns:1fr}}
-</style></head><body><div class="bg"></div><div class="bg-overlay"></div><div class="app"><aside class="sidebar"><div class="brand"><img src="kepek/tek1.png" decoding="async" alt="logó"><div class="txt"><b>Terrorelhárítás</b><span>Budapesti Igazgatósága</span></div></div><nav class="menu" id="menu"><button class="menu-item active" data-view="attekintes" data-title="Áttekintés"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+</style></head><body><div class="bg"></div><div class="bg-overlay"></div><div class="app"><header class="mobil-fej"><button class="menu-gomb" id="menuGomb" type="button" aria-label="Menü megnyitása" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button><img src="kepek/tek1.png" decoding="async" alt=""><div class="cim"><b>Terrorelhárítás</b><span id="mobilAlcim">Áttekintés</span></div></header><div class="menu-hatter" id="menuHatter"></div><aside class="sidebar" id="oldalsav"><div class="brand"><img src="kepek/tek1.png" decoding="async" alt="logó"><div class="txt"><b>Terrorelhárítás</b><span>Budapesti Igazgatósága</span></div></div><nav class="menu" id="menu"><button class="menu-item active" data-view="attekintes" data-title="Áttekintés"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
                     Áttekintés
                 </button><button class="menu-item" data-view="szolgalat" data-title="Szolgálat leadás"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
                     Szolgálat leadás
@@ -340,6 +396,8 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
             views.forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + nezet).classList.add('active');
             cim.textContent = gomb.dataset.title;
+            document.getElementById('mobilAlcim').textContent = gomb.dataset.title;
+            if (document.body.classList.contains('menu-nyitva')) { menuNyit(false); window.scrollTo(0, 0); }
             if (nezet.indexOf('admin') === 0 && typeof adminNezetBetolt === 'function') {
                 adminNezetBetolt(nezet);
             }
@@ -348,6 +406,22 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                 kezikonyvBetolt();
             }
         });
+        // ── Telefonos becsúszó menü ──
+        const menuGomb = document.getElementById('menuGomb');
+        function menuNyit(nyit) {
+            document.body.classList.toggle('menu-nyitva', nyit);
+            menuGomb.setAttribute('aria-expanded', nyit ? 'true' : 'false');
+        }
+        menuGomb.addEventListener('click', function () { menuNyit(!document.body.classList.contains('menu-nyitva')); });
+        document.getElementById('menuHatter').addEventListener('click', function () { menuNyit(false); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menuNyit(false); });
+        // ujjal balra húzva is bezárul
+        (function () {
+            const sav = document.getElementById('oldalsav'); let x0 = null;
+            sav.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+            sav.addEventListener('touchend', e => { if (x0 !== null && e.changedTouches[0].clientX - x0 < -60) menuNyit(false); x0 = null; }, { passive: true });
+        })();
+        window.matchMedia('(min-width: 861px)').addEventListener('change', function (m) { if (m.matches) menuNyit(false); });
         document.getElementById('kilepesGomb').addEventListener('click', function () {
             sessionStorage.clear();
             window.location.href = 'index.html';
