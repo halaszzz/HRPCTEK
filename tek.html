@@ -96,6 +96,24 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .form-msg.ok{background:rgba(46,204,113,.14);border:1px solid rgba(46,204,113,.4);color:#7fe3a8}
 .form-msg.err{background:rgba(229,72,77,.14);border:1px solid rgba(229,72,77,.45);color:#ffa3a6}
 
+/* Szolgálat számláló */
+.szolg-wrap{display:flex;flex-direction:column;gap:16px;max-width:620px;margin:0 auto}
+.szolg-wrap .form-card{max-width:none;margin:0;width:100%}
+.szolg-ora{font-size:56px;font-weight:700;text-align:center;letter-spacing:2px;font-variant-numeric:tabular-nums;margin:10px 0 4px;color:var(--text-muted)}
+.szolg-kartya.fut .szolg-ora{color:var(--tek-yellow)}
+.szolg-allapot{text-align:center;font-size:13px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:8px}
+.szolg-allapot .pont{width:9px;height:9px;border-radius:50%;background:#6fe09f;box-shadow:0 0 0 0 rgba(111,224,159,.6);animation:pulzus 1.6s infinite}
+@keyframes pulzus{70%{box-shadow:0 0 0 8px rgba(111,224,159,0)}100%{box-shadow:0 0 0 0 rgba(111,224,159,0)}}
+.szolg-gomb{width:100%;padding:15px;font-size:15px}
+.szolg-gomb.leallit{background:#e5484d;color:#fff}
+.szolg-gomb.leallit:hover{background:#f05a5f;outline-color:var(--tek-yellow)}
+.szolg-het table.admin-tabla td:last-child,.szolg-het table.admin-tabla th:last-child{text-align:right}
+.menu-item[data-view="szolgalat"].fut::after{content:'';width:8px;height:8px;border-radius:50%;background:#6fe09f;margin-left:auto;box-shadow:0 0 6px #6fe09f}
+.aktiv-sor{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;flex-wrap:wrap}
+.aktiv-sor:last-child{border-bottom:none}
+.aktiv-sor .pont{width:8px;height:8px;border-radius:50%;background:#6fe09f;flex-shrink:0}
+@media (max-width:860px){.szolg-ora{font-size:46px}}
+
 /* Kézikönyv */
 .kk-lista-elem{cursor:pointer;transition:border-color .14s ease}
 .kk-lista-elem:hover{border-color:var(--tek-yellow)}
@@ -324,7 +342,14 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                         Adatmódosítások
                     </button><button class="menu-item" data-view="adminKezikonyv" data-title="Kézikönyv kezelés"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
                         Kézikönyv kezelés
-                    </button></div></nav><div class="sidebar-footer"><div class="user-row"><div class="avatar" id="avatar">T</div><div class="info"><div class="nev" id="userNev">–</div><div class="rang" id="userRang">–</div></div></div><button class="logout" id="kilepesGomb">Kilépés</button></div></aside><main class="content"><div class="content-head"><h1 id="viewTitle">Áttekintés</h1><p id="viewSub">Terrorelárítási központ Budapesti Igazgatósága · belső frakció felület</p></div><div class="content-body"><section class="view active" id="view-attekintes"><div class="charts"><div class="chart-card"><h3>Heti jelentéseim</h3><div class="sub">Saját leadott jelentések a héten (naponta)</div><div class="chart-wrap"><canvas id="chartSajat"></canvas></div></div><div class="chart-card"><h3>Heti szolgálat ideje</h3><div class="sub">Saját szolgálati idő a héten (naponta, perc)</div><div class="chart-wrap"><canvas id="chartSzolg"></canvas></div></div></div><div class="stats"><div class="stat"><div class="label">Név</div><div class="value small" id="statNev">–</div></div><div class="stat"><div class="label">Rang</div><div class="value small" id="statRang">–</div></div><div class="stat"><div class="label">Jelentések</div><div class="value" id="sumJelentes">–</div></div><div class="stat"><div class="label">Szolgálati idő</div><div class="value small" id="sumPerc">–</div></div><div class="stat"><div class="label">Végösszeg</div><div class="value small" id="sumPenz">–</div></div></div><div class="panel"><h3>Üdvözlünk a belső rendszerben</h3><p>Jelenleg az oldal BETA verzióban fut, ezért lehetnek hibák benne. Ez egy Roleplay szerverhez készült, realitási alapja nincs, valóságnak nem felel meg.</p></div></section><section class="view" id="view-szolgalat"><div class="form-card"><h3>Szolgálat leadása</h3><p class="lead">Add meg a szolgálatba lépés és leadás időpontját, csak console-ból kimásolt rádiózással fogadjuk el a szolgálatot.</p><div class="fld"><label for="szolgKezdes">Szolgálatba lépés (ÉV/HÓNAP/NAP – ÓRA/PERC)</label><input type="text" id="szolgKezdes" placeholder="2026/07/05 - 14:30" autocomplete="off"></div><div class="fld"><label for="szolgVege">Szolgálat leadása (ÉV/HÓNAP/NAP – ÓRA/PERC)</label><input type="text" id="szolgVege" placeholder="2026/07/05 - 18:00" autocomplete="off"></div><div class="fld"><label for="szolgKonzol">Konzol napló</label><textarea id="szolgKonzol" placeholder="Ide illeszd be a konzolból a sorokat…"></textarea><div class="hint">Hosszabb, több soros szöveg is beilleszthető.</div></div><button class="form-submit" id="szolgKuld">Szolgálat leadása</button><div class="form-msg" id="szolgMsg"></div></div></section><section class="view" id="view-jelentes"><div class="btk">
+                    </button></div></nav><div class="sidebar-footer"><div class="user-row"><div class="avatar" id="avatar">T</div><div class="info"><div class="nev" id="userNev">–</div><div class="rang" id="userRang">–</div></div></div><button class="logout" id="kilepesGomb">Kilépés</button></div></aside><main class="content"><div class="content-head"><h1 id="viewTitle">Áttekintés</h1><p id="viewSub">Terrorelárítási központ Budapesti Igazgatósága · belső frakció felület</p></div><div class="content-body"><section class="view active" id="view-attekintes"><div class="charts"><div class="chart-card"><h3>Heti jelentéseim</h3><div class="sub">Saját leadott jelentések a héten (naponta)</div><div class="chart-wrap"><canvas id="chartSajat"></canvas></div></div><div class="chart-card"><h3>Heti szolgálat ideje</h3><div class="sub">Saját szolgálati idő a héten (naponta, perc)</div><div class="chart-wrap"><canvas id="chartSzolg"></canvas></div></div></div><div class="stats"><div class="stat"><div class="label">Név</div><div class="value small" id="statNev">–</div></div><div class="stat"><div class="label">Rang</div><div class="value small" id="statRang">–</div></div><div class="stat"><div class="label">Jelentések</div><div class="value" id="sumJelentes">–</div></div><div class="stat"><div class="label">Szolgálati idő</div><div class="value small" id="sumPerc">–</div></div><div class="stat"><div class="label">Végösszeg</div><div class="value small" id="sumPenz">–</div></div></div><div class="panel"><h3>Üdvözlünk a belső rendszerben</h3><p>Jelenleg az oldal BETA verzióban fut, ezért lehetnek hibák benne. Ez egy Roleplay szerverhez készült, realitási alapja nincs, valóságnak nem felel meg.</p></div></section><section class="view" id="view-szolgalat"><div class="szolg-wrap">
+<div class="form-card szolg-kartya"><h3>Szolgálat</h3><p class="lead">Szolgálatba lépéskor indítsd el a számlálót, a szolgálat végén állítsd le. Az időt a szerver méri, így az oldal bezárása vagy újratöltése sem állítja meg.</p>
+<div class="szolg-ora" id="szolgOra">00:00:00</div>
+<div class="szolg-allapot" id="szolgAllapot">Betöltés…</div>
+<button class="form-submit szolg-gomb" id="szolgGomb" disabled>Betöltés…</button>
+<div class="form-msg" id="szolgMsg"></div></div>
+<div class="form-card szolg-het"><h3>Heti szolgálataim</h3><p class="lead" id="szolgHetOssz">Az aktuális hét (hétfőtől) leadott szolgálatai.</p><div id="szolgHetLista"><div class="admin-ures">Betöltés…</div></div></div>
+</div></section><section class="view" id="view-jelentes"><div class="btk">
 <div class="btk-kereso-wrap">
   <div class="btk-kereso">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -370,6 +395,21 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
 </div>
 <div class="fld" style="margin-top:18px"><label for="jkSzoveg">Jegyzőkönyv (részletesen)</label><textarea id="jkSzoveg" rows="10" placeholder="A mai nap során, szolgálat ellátása közben…"></textarea></div>
 <button class="form-submit" id="jkKuld">Jelentés leadása</button><div class="form-msg" id="jkMsg"></div></div></section><section class="view" id="view-adatmodositas"><div class="subtabs" id="modSubtabs"><button class="subtab active" data-sub="modAdat">Adatmódosítás</button><button class="subtab" data-sub="modIgeny">Igénylések</button><button class="subtab" data-sub="modElozmeny">Kérelmeim</button></div><div class="subview" id="sub-modAdat"><div class="form-card"><h3>Adatmódosítás</h3><p class="lead">A kérelmet a vezetőség hagyja jóvá – a változás csak elfogadás után lép életbe.</p><div class="fld"><label for="adatTipus">Mit szeretnél módosítani?</label><select id="adatTipus"><option value="jelszo">Új jelszó</option><option value="felhasznalonev">Felhasználónév módosítás</option><option value="jatekbeli_nev">InGame módosítás</option></select></div><div class="fld"><label for="adatErtek" id="adatErtekLabel">Új jelszó</label><input type="text" id="adatErtek" placeholder="Új jelszó" autocomplete="off"></div><button class="form-submit" id="adatKuld">Kérelem beküldése</button><div class="form-msg" id="adatMsg"></div></div></div><div class="subview" id="sub-modIgeny" style="display:none;"><div class="form-card"><h3>Igénylések</h3><p class="lead">Jármű, jelvény vagy admin jog igénylése. A vezetőség bírálja el.</p><div class="fld"><label for="igenyTipus">Mit szeretnél igényelni?</label><select id="igenyTipus"><option value="jarmu">Új jármű</option><option value="jelveny">Új jelvény</option><option value="admin">Admin jog</option></select></div><div class="fld" id="igenyErtekFld"><label for="igenyErtek" id="igenyErtekLabel">Melyik járművet igényled?</label><input type="text" id="igenyErtek" placeholder="Jármű rendszáma" autocomplete="off"></div><button class="form-submit" id="igenyKuld">Igénylés beküldése</button><div class="form-msg" id="igenyMsg"></div></div></div><div class="subview" id="sub-modElozmeny" style="display:none;"><div id="sajatKerelmekTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></div></section><section class="view" id="view-kezikonyv"><div id="kezikonyvLista" class="admin-lista"><div class="admin-ures">Betöltés…</div></div><div id="kezikonyvOlvaso" style="display:none;"><button class="btn-mini" id="kezikonyvVissza">← Vissza a listához</button><div class="form-card" style="margin-top:14px;"><h3 id="kkCim">–</h3><div class="kk-meta" id="kkMeta"></div><div class="kk-tartalom" id="kkTartalom"></div></div></div></section><section class="view" id="view-vizsgak"><div class="empty"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 2.5 9 2.5 12 0v-5"/></svg></div><h3>Vizsgák</h3><p>Vizsgák és képzések nyilvántartása.</p><span class="tag">Hamarosan</span></div></section><section class="view" id="view-beallitasok"><div class="empty"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div><h3>Beállítások</h3><p>Fiók- és rendszerbeállítások.</p><span class="tag">Hamarosan</span></div></section><section class="view" id="view-adminJelentesek"><div id="adminJelentesekTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminSzolgalat"><div id="adminSzolgalatTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminUjDolgozo"><div class="form-card"><h3>Új felhasználó</h3><p class="lead">Új felhasználói fiók létrehozása a szolgálathoz.</p><div class="fld"><label for="ujFn">Felhasználó név</label><input type="text" id="ujFn" placeholder="pl. kovacs.bela" autocomplete="off"></div><div class="fld"><label for="ujJelszo">Jelszó</label><input type="text" id="ujJelszo" placeholder="Jelszó" autocomplete="off"></div><div class="fld"><label for="ujNev">Ingame neve</label><input type="text" id="ujNev" placeholder="pl. Kovács Béla" autocomplete="off"></div><div class="fld"><label for="ujRang">Rendfokozat</label><select id="ujRang"><option value="r. Alezredes">r. Alezredes</option><option value="r. Ezredes">r. Ezredes</option><option value="r. Őrnagy">r. Őrnagy</option><option value="r. Százados">r. Százados</option><option value="r. Főhadnagy">r. Főhadnagy</option><option value="r. Hadnagy">r. Hadnagy</option><option value="r. Főtörzszászlós">r. Főtörzszászlós</option><option value="&quot;B+&quot; r. Törzszászlós">r. Törzszászlós</option><option value="&quot;A&quot; r. Zászlós">r. Zászlós</option><option value="r. Főtörzsőrmester" selected>r. Főtörzsőrmester</option><option value="r. Törzsőrmester" selected>r. Törzsőrmester</option><option value="r. Őrmester" selected>r. Őrmester</option><option value="r. Próbaidős Őrmester" selected>r. Próbaidős Őrmester</option></select></div><button class="form-submit" id="ujDolgozoKuld">Account létrehozása</button><div class="form-msg" id="ujDolgozoMsg"></div></div></section><section class="view" id="view-adminDolgozok"><div id="adminDolgozokTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminOsszegzo"><div class="admin-total-row"><div class="stat"><div class="label">Heti jelentések</div><div class="value" id="oJel">–</div></div><div class="stat"><div class="label">Heti szolgálati idő ((perc))</div><div class="value small" id="oPerc">–</div></div><div class="stat"><div class="label">Heti végösszeg</div><div class="value small" id="oPenz">–</div></div></div><div id="adminOsszegzoTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div><div class="veszelyzona"><h4>Heti zárás</h4><p>Az összes leadott jelentés és szolgálat végleges törlése. Ez nem visszavonható, csak azután törölj, hogy zártál!</p><button class="btn-mini piros" id="nullazMind">Összes beküldés nullázása</button></div></section><section class="view" id="view-adminModositasok"><div id="adminModositasokTart" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section><section class="view" id="view-adminKezikonyv"><div class="form-card" style="margin-bottom:18px;"><h3 id="kkSzerkCim">Új kézikönyv téma</h3><p class="lead">Hozz létre egy témát, amit a dolgozók a Kézikönyv fülön elolvashatnak.</p><div class="fld"><label for="kkFormCim">Cím</label><input type="text" id="kkFormCim" placeholder="pl. Szolgálati protokoll" autocomplete="off"></div><div class="fld"><label for="kkFormTartalom">Tartalom</label><textarea id="kkFormTartalom" placeholder="A kézikönyv szövege…"></textarea></div><input type="hidden" id="kkFormId" value=""><button class="form-submit" id="kkMent">Létrehozás</button><button class="btn-mini" id="kkMegse" style="display:none; margin-left:8px;">Mégse</button><div class="form-msg" id="kkFormMsg"></div></div><div id="adminKezikonyvLista" class="admin-lista"><div class="admin-ures">Betöltés…</div></div></section></div></main></div><script src="config.js"></script><script>
+        // ── Bejelentkezés megtartása ──
+        // A böngésző (főleg telefonon / Discord-ban) a sessionStorage-t a lap bezárásakor törli,
+        // ezért egy másolatot a localStorage-ban is tartunk – így csak a Kilépés gomb léptet ki.
+        (function () {
+            const KULCSOK = ['bejelentkezve', 'user_felhasznalonev', 'user_nev', 'user_rang', 'user_admin'];
+            try {
+                if (sessionStorage.getItem('bejelentkezve') === '1') {
+                    const m = {}; KULCSOK.forEach(k => m[k] = sessionStorage.getItem(k));
+                    localStorage.setItem('tek_munkamenet', JSON.stringify(m));
+                } else {
+                    const m = JSON.parse(localStorage.getItem('tek_munkamenet') || 'null');
+                    if (m && m.bejelentkezve === '1') KULCSOK.forEach(k => { if (m[k] != null) sessionStorage.setItem(k, m[k]); });
+                }
+            } catch (e) {}
+        })();
         if (sessionStorage.getItem('bejelentkezve') !== '1') {
             window.location.replace('index.html');
         }
@@ -402,6 +442,7 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                 adminNezetBetolt(nezet);
             }
             if (nezet === 'jelentes' && typeof btkTablaEpit === 'function') btkTablaEpit();
+            if (nezet === 'szolgalat' && typeof window.szolgalatFrissit === 'function') window.szolgalatFrissit();
             if (nezet === 'kezikonyv' && typeof kezikonyvBetolt === 'function') {
                 kezikonyvBetolt();
             }
@@ -424,6 +465,7 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
         window.matchMedia('(min-width: 861px)').addEventListener('change', function (m) { if (m.matches) menuNyit(false); });
         document.getElementById('kilepesGomb').addEventListener('click', function () {
             sessionStorage.clear();
+            try { localStorage.removeItem('tek_munkamenet'); } catch (e) {}
             window.location.href = 'index.html';
         });
         async function kezikonyvBetolt() {
@@ -468,9 +510,9 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
         // Olvasó műveletek: a válasz a böngészőben tárolódik (sessionStorage), így a következő
         // megnyitáskor AZONNAL megjelenik, a friss adat pedig a háttérben töltődik be.
         // Bármilyen író művelet (leadás, törlés, mentés…) után a tárolt adatok törlődnek.
-        const OLVASO_MUVELETEK = new Set(['getStats', 'kezikonyvLista', 'sajatModositasok', 'adminJegyzokonyvek', 'adminSzolgalatok', 'adminOsszegzo']);
+        const OLVASO_MUVELETEK = new Set(['getStats', 'sajatSzolgalatok', 'kezikonyvLista', 'sajatModositasok', 'adminJegyzokonyvek', 'adminSzolgalatok', 'adminOsszegzo']);
         // csak lekérdeznek, de nem tároljuk őket (szerkeszthető mezők vannak bennük) – ezek NEM törlik a tárolt adatokat
-        const NEM_IRO = new Set(['adminDolgozok', 'adminModositasok', 'listDolgozok', 'checkUser', 'login']);
+        const NEM_IRO = new Set(['szolgalatAllapot', 'adminDolgozok', 'adminModositasok', 'listDolgozok', 'checkUser', 'login']);
         const CACHE_ELO = 'rzc:';
         const _futo = new Map();
         function cacheTorol() {
@@ -947,6 +989,76 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
         btkFrissit();
         (window.requestIdleCallback || function (f) { setTimeout(f, 300); })(btkTablaEpit);
 
+        // ── SZOLGÁLAT SZÁMLÁLÓ ──
+        (function () {
+            const el = id => document.getElementById(id);
+            const ora = el('szolgOra'), allapot = el('szolgAllapot'), gomb = el('szolgGomb'), msg = el('szolgMsg'), kartya = gomb.closest('.szolg-kartya');
+            const menuPont = document.querySelector('.menu-item[data-view="szolgalat"]');
+            let kezdesMs = null, eltolas = 0, idozito = null, dolgozik = false;
+            const ket = n => String(n).padStart(2, '0');
+            function formaz(ms) { const s = Math.max(0, Math.floor(ms / 1000)); return ket(Math.floor(s / 3600)) + ':' + ket(Math.floor(s / 60) % 60) + ':' + ket(s % 60); }
+            function rajzol() { ora.textContent = kezdesMs == null ? '00:00:00' : formaz(Date.now() + eltolas - kezdesMs); }
+            function allit(a) {
+                if (a.most) eltolas = a.most - Date.now();          // a szerver órájához igazodunk
+                kezdesMs = a.aktiv ? a.kezdes : null;
+                clearInterval(idozito);
+                if (kezdesMs != null) idozito = setInterval(rajzol, 1000);
+                rajzol();
+                const fut = kezdesMs != null;
+                kartya.classList.toggle('fut', fut);
+                menuPont.classList.toggle('fut', fut);
+                gomb.disabled = false;
+                gomb.classList.toggle('leallit', fut);
+                gomb.textContent = fut ? 'Szolgálat leállítása' : 'Szolgálat indítása';
+                if (fut) {
+                    const k = new Date(kezdesMs - eltolas);
+                    allapot.innerHTML = '<span class="pont"></span>Szolgálatban vagy ' + ket(k.getHours()) + ':' + ket(k.getMinutes()) + ' óta';
+                } else allapot.textContent = 'Nem vagy szolgálatban.';
+            }
+            async function allapotBetolt() {
+                try {
+                    const a = await apiHivas({ action: 'szolgalatAllapot', felhasznalonev: felhasznalonev });
+                    if (a.ok) allit(a); else { allapot.textContent = a.error || 'Hiba.'; }
+                } catch (err) { allapot.textContent = 'Nem sikerült kapcsolódni a szerverhez.'; gomb.disabled = false; gomb.textContent = 'Újrapróbálás'; gomb.onclick = function () { gomb.onclick = null; allapotBetolt(); }; }
+            }
+            async function hetBetolt() {
+                const tart = el('szolgHetLista');
+                try {
+                    await apiOlvas({ action: 'sajatSzolgalatok', felhasznalonev: felhasznalonev }, function (a) {
+                        if (!a.ok) { tart.innerHTML = '<div class="admin-ures">' + htmlEsc(a.error || 'Hiba') + '</div>'; return; }
+                        const l = a.szolgalatok || [];
+                        el('szolgHetOssz').textContent = 'Ezen a héten összesen: ' + percSzoveg(a.osszPerc || 0) + ' (' + l.length + ' szolgálat)';
+                        tart.innerHTML = l.length ? '<div style="overflow-x:auto"><table class="admin-tabla"><thead><tr><th>Kezdés</th><th>Leállítás</th><th>Idő</th></tr></thead><tbody>'
+                            + l.map(x => '<tr><td>' + htmlEsc(x.kezdes) + '</td><td>' + htmlEsc(x.vege) + '</td><td>' + percSzoveg(x.perc) + '</td></tr>').join('')
+                            + '</tbody></table></div>' : '<div class="admin-ures">Ezen a héten még nincs leadott szolgálatod.</div>';
+                    });
+                } catch (err) { tart.innerHTML = '<div class="admin-ures">Nem sikerült betölteni.</div>'; }
+            }
+            gomb.addEventListener('click', async function () {
+                if (dolgozik || gomb.onclick) return;
+                const fut = kezdesMs != null;
+                if (fut && !confirm('Biztosan leállítod a szolgálatot? (' + ora.textContent + ')')) return;
+                dolgozik = true; gomb.disabled = true; gomb.textContent = fut ? 'Leállítás…' : 'Indítás…'; msg.className = 'form-msg';
+                try {
+                    const a = await apiHivas({ action: fut ? 'szolgalatLeallitas' : 'szolgalatInditas', felhasznalonev: felhasznalonev });
+                    if (a.ok) {
+                        allit(a);
+                        if (fut) {
+                            if (a.rogzitve) uzenet(msg, 'Szolgálat rögzítve: ' + percSzoveg(a.perc) + '.', true);
+                            else uzenet(msg, '1 percnél rövidebb szolgálat nem kerül rögzítésre.', false);
+                            hetBetolt();
+                        } else uzenet(msg, 'Szolgálat elindítva. Jó szolgálatot!', true);
+                    } else { uzenet(msg, a.error || 'Hiba.', false); allapotBetolt(); }
+                } catch (err) { uzenet(msg, 'Nem sikerült kapcsolódni a szerverhez.', false); allapotBetolt(); }
+                dolgozik = false;
+            });
+            // ha a telefon / gép alvásból tér vissza, igazodjunk újra a szerverhez
+            document.addEventListener('visibilitychange', function () { if (!document.hidden) allapotBetolt(); });
+            window.szolgalatFrissit = function () { allapotBetolt(); hetBetolt(); };
+            allapotBetolt();
+            hetBetolt();
+        })();
+
         // ── JELENTÉS (JEGYZŐKÖNYV) LEADÁSA ──
         (function () {
             const mezok = { nev: 'jkNev', rendfokozat: 'jkRang', azonosito: 'jkAzon', beosztas: 'jkBeosztas', szolgalatiHely: 'jkHely', datum: 'jkDatum', jegyzokonyv: 'jkSzoveg' };
@@ -1174,14 +1286,16 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                     const cs = {};
                     (adat.szolgalatok || []).forEach(function (s) { const k = s.felhasznalonev; (cs[k] = cs[k] || { nev: s.nev, fn: k, elemek: [] }).elemek.push(s); });
                     const kulcsok = Object.keys(cs);
-                    if (kulcsok.length === 0) { tart.innerHTML = '<div class="admin-ures">Még nincs leadott szolgálat.</div>'; return; }
-                    let html = '';
+                    const aktivak = adat.aktivak || [];
+                    let html = aktivak.length ? '<div class="admin-card"><div class="fej"><span class="nev">Jelenleg szolgálatban</span><span class="spacer"></span><span class="badge zold">' + aktivak.length + ' fő</span></div>'
+                        + aktivak.map(function (a) { return '<div class="aktiv-sor"><span class="pont"></span><b>' + esc(a.nev || a.felhasznalonev) + '</b><span class="fn">@' + esc(a.felhasznalonev) + '</span><span class="spacer" style="flex:1"></span><span class="kerelem-meta">' + esc(a.kezdes) + ' óta · ' + percStr(a.perc) + '</span></div>'; }).join('') + '</div>' : '';
+                    if (kulcsok.length === 0) { tart.innerHTML = html + '<div class="admin-ures">Még nincs leadott szolgálat.</div>'; return; }
                     kulcsok.forEach(function (k) {
                         const g = cs[k];
                         const op = g.elemek.reduce(function (s, e) { return s + (e.perc || 0); }, 0);
                         html += '<div class="admin-card"><div class="fej"><span class="nev">' + esc(g.nev || g.fn) + '</span><span class="fn">@' + esc(g.fn) + '</span><span class="spacer"></span><span class="badge">' + g.elemek.length + ' szolgálat</span><span class="badge zold">' + percStr(op) + '</span></div>'
-                            + '<table class="admin-tabla"><thead><tr><th>Szolgálatba lépés</th><th>Leadás</th><th>Idő</th></tr></thead><tbody>';
-                        g.elemek.forEach(function (e) { html += '<tr><td>' + esc(e.kezdes) + '</td><td>' + esc(e.vege) + '</td><td>' + percStr(e.perc) + '</td></tr>'; });
+                            + '<table class="admin-tabla"><thead><tr><th>Szolgálatba lépés</th><th>Leállítás</th><th>Idő</th><th></th></tr></thead><tbody>';
+                        g.elemek.forEach(function (e) { html += '<tr><td>' + esc(e.kezdes) + '</td><td>' + esc(e.vege) + '</td><td>' + percStr(e.perc) + '</td><td style="text-align:right"><button class="btn-mini piros" data-storno="' + esc(e.sor) + '" data-storno-info="' + esc((g.nev || g.fn) + ', ' + e.kezdes + ' – ' + e.vege) + '">Sztornó</button></td></tr>'; });
                         html += '</tbody></table></div>';
                     });
                     tart.innerHTML = html;
@@ -1321,7 +1435,7 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                     mentBtn.disabled = true; mentBtn.textContent = 'Mentés…';
                     try {
                         const adat = await apiHivas(payload);
-                        if (adat.ok) { loadDolgozok(); }
+                        if (adat.ok) { loadDolgozok(); if (String(mentBtn.dataset.ment).toLowerCase() === felhasznalonev.toLowerCase() && window.profilUjratolt) window.profilUjratolt(); }
                         else { msg.className = 'form-msg show err'; msg.textContent = adat.error || 'Hiba.'; mentBtn.disabled = false; mentBtn.textContent = 'Mentés'; }
                     } catch (err) { msg.className = 'form-msg show err'; msg.textContent = 'Szerver hiba.'; mentBtn.disabled = false; mentBtn.textContent = 'Mentés'; }
                     return;
@@ -1333,6 +1447,16 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                     torolBtn.disabled = true;
                     const adat = await apiHivas({ action: 'adminDolgozoTorol', felhasznalonev: felhasznalonev, cel_felhasznalonev: fn });
                     if (adat.ok) loadDolgozok(); else { alert(adat.error || 'Hiba.'); torolBtn.disabled = false; }
+                    return;
+                }
+                const stornoBtn = e.target.closest('[data-storno]');
+                if (stornoBtn) {
+                    if (!confirm('Biztosan sztornózod ezt a szolgálatot?\n\n' + stornoBtn.dataset.stornoInfo + '\n\nEz nem visszavonható.')) return;
+                    stornoBtn.disabled = true; stornoBtn.textContent = '…';
+                    try {
+                        const adat = await apiHivas({ action: 'adminSzolgalatStorno', felhasznalonev: felhasznalonev, sor: Number(stornoBtn.dataset.storno) });
+                        if (adat.ok) loadSzolgalat(); else { alert(adat.error || 'Hiba.'); stornoBtn.disabled = false; stornoBtn.textContent = 'Sztornó'; }
+                    } catch (err) { alert('Szerver hiba.'); stornoBtn.disabled = false; stornoBtn.textContent = 'Sztornó'; }
                     return;
                 }
                 const jtorol = e.target.closest('[data-torol-jk]');
@@ -1366,8 +1490,27 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
             const napok = ['Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat', 'Vasárnap'];
             const NULLA = [0, 0, 0, 0, 0, 0, 0];
             let utolso = null, chart1 = null, chart2 = null;
+            function profilFrissit(a) {
+                if (a.rang == null && a.nev == null) return;
+                const ujNev = String(a.nev || nev), ujRang = String(a.rang || rang);
+                document.getElementById('userNev').textContent = ujNev;
+                document.getElementById('userRang').textContent = ujRang;
+                document.getElementById('statNev').textContent = ujNev;
+                document.getElementById('statRang').textContent = ujRang;
+                document.getElementById('avatar').textContent = (ujNev.trim()[0] || 'F').toUpperCase();
+                const jkRang = document.getElementById('jkRang');
+                if (jkRang && (!jkRang.value || jkRang.value === sessionStorage.getItem('user_rang'))) jkRang.value = ujRang;
+                try {
+                    sessionStorage.setItem('user_nev', ujNev);
+                    sessionStorage.setItem('user_rang', ujRang);
+                    if (a.admin != null) sessionStorage.setItem('user_admin', a.admin ? '1' : '0');
+                    const m = JSON.parse(localStorage.getItem('tek_munkamenet') || 'null');
+                    if (m) { m.user_nev = ujNev; m.user_rang = ujRang; if (a.admin != null) m.user_admin = a.admin ? '1' : '0'; localStorage.setItem('tek_munkamenet', JSON.stringify(m)); }
+                } catch (e) {}
+            }
             function megjelenit() {
                 if (!utolso || !utolso.ok) return;
+                profilFrissit(utolso);
                 document.getElementById('sumJelentes').textContent = (utolso.osszJelentes || 0).toLocaleString('hu-HU');
                 document.getElementById('sumPerc').textContent = percSzoveg(utolso.osszPerc || 0);
                 document.getElementById('sumPenz').textContent = (utolso.osszPenz || 0).toLocaleString('hu-HU') + ' Ft';
@@ -1375,7 +1518,9 @@ table.admin-tabla a:hover{outline:1.5px solid var(--tek-yellow)}
                 if (chart2) { chart2.data.datasets[0].data = utolso.hetiSzolgPerc || NULLA.slice(); chart2.update(); }
             }
             // a kérés azonnal indul, nem várja meg a grafikon-könyvtárat
-            apiOlvas({ action: 'getStats', felhasznalonev: felhasznalonev }, function (adat) { utolso = adat; megjelenit(); }).catch(function () {});
+            function statBetolt() { apiOlvas({ action: 'getStats', felhasznalonev: felhasznalonev }, function (adat) { utolso = adat; megjelenit(); }).catch(function () {}); }
+            window.profilUjratolt = statBetolt;
+            statBetolt();
 
             function grafikonok() {
                 if (typeof Chart === 'undefined') return;
